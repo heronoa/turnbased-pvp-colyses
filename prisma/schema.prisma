@@ -1,0 +1,135 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider     = "mongodb"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
+}
+
+model User {
+    id         String      @id @default(auto()) @map("_id") @db.ObjectId
+    email      String      @unique
+    username   String
+    password   String
+    character  Character[]
+    updated_at DateTime    @updatedAt
+    created_at DateTime    @default(now())
+
+    @@map("user")
+}
+
+model CharacterAttribute {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+
+    hp      Int
+    magicka Int
+
+    strength     Int
+    dexterity    Int
+    willpower    Int
+    resistence   Int
+    intelligence Int
+    vitality     Int
+
+    updated_at DateTime @updatedAt
+    created_at DateTime @default(now())
+
+    Character   Character? @relation(fields: [characterId], references: [id])
+    characterId String?    @unique @db.ObjectId
+
+    @@map("characterAttribute")
+}
+
+model Skill {
+    id         String    @id @default(auto()) @map("_id") @db.ObjectId
+    name       String
+    duration   String?
+    effect     Effect
+    baseDamage Int?
+    type       SkillType
+    baseCost   Int
+
+    Character   Character? @relation(fields: [characterId], references: [id])
+    characterId String?    @db.ObjectId
+}
+
+enum Effect {
+    DAMAGE
+    STATUS
+    BUFF
+}
+
+enum SkillType {
+    FIRE
+    WATER
+    EARTH
+    AIR
+    BLUNT
+    CUT
+    PIERCE
+}
+
+model Character {
+    id         String  @id @default(auto()) @map("_id") @db.ObjectId
+    name       String
+    exp        Int
+    level      Int
+    levelupExp Int
+    heroClass  String
+    userId     String  @db.ObjectId
+    skill      Skill[]
+
+    updated_at           DateTime            @updatedAt
+    created_at           DateTime            @default(now())
+    characterAttributeId String?             @unique @db.ObjectId
+    CharacterAttribute   CharacterAttribute?
+    User                 User                @relation(fields: [userId], references: [id])
+
+    @@map("character")
+}
+
+// model UserCharacters {
+//     id         String      @id @default(auto()) @map("_id") @db.ObjectId
+//     user       User
+//     userId     String      @db.ObjectId
+//     characters Character[]
+//     updated_at DateTime    @updatedAt
+//     created_at DateTime    @default(now())
+// }
+
+model Pet {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    assetId     String   @unique
+    wallet      String
+    GameHistory String[]
+    updated_at  DateTime @updatedAt
+    created_at  DateTime @default(now())
+
+    @@map("pet")
+}
+
+model Player {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    wallet      String   @unique
+    GameHistory String[]
+    gameId      String?  @db.ObjectId
+    updated_at  DateTime @updatedAt
+    created_at  DateTime @default(now())
+
+    @@map("player")
+}
+
+model Game {
+    id              String   @id @default(auto()) @map("_id") @db.ObjectId
+    room_id         String
+    winner          String?
+    initial_players String[]
+    rounds          String
+    isRanked        Boolean?
+    updated_at      DateTime @updatedAt
+    created_at      DateTime @default(now())
+
+    @@map("game")
+}
