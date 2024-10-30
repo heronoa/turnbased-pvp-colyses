@@ -32,6 +32,7 @@ export class CharactersPrismaORMRepository implements ICharactersRepository {
         },
         include: {
           CharacterAttribute: true,
+          skill: true,
         },
       });
     } catch (err) {

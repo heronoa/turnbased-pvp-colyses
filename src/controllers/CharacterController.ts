@@ -68,6 +68,11 @@ export class CharacterController {
                 ...InitialAttributesByClass[heroClass],
               },
             },
+            skill: {
+              createMany: {
+                data: InitialSkills[heroClass],
+              },
+            },
           },
         });
 
@@ -77,7 +82,6 @@ export class CharacterController {
         );
         return "Character created sucessfully";
       }
-      return "Character creation failed";
     } catch (error) {
       console.error("Erro ao adicionar personagem:", error);
       return "Character creation failed";

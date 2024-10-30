@@ -6,6 +6,28 @@ import {
   WinnerSchema,
 } from "./MyRoomState";
 
+type Effect = "DAMAGE" | "STATUS" | "BUFF";
+
+type SkillType =
+  | "FIRE"
+  | "WATER"
+  | "EARTH"
+  | "AIR"
+  | "BLUNT"
+  | "CUT"
+  | "PIERCE";
+
+export interface Skill {
+  id: string;
+  name: string;
+  duration?: string;
+  effect: Effect;
+  baseDamage?: number;
+  type: SkillType;
+  baseCost: number;
+  countdown: number;
+  channeling?: number;
+}
 export interface ICharacterInitial {
   player_db_id: string;
   userId: string;

@@ -1,6 +1,6 @@
 import { Schema, MapSchema, type } from "@colyseus/schema";
 import { attributesCalculations } from "../../utils/calculations";
-import { ICharacterInitial } from "./GameStates";
+import { ICharacterInitial, Skill } from "./GameStates";
 
 export class PlayerSchema extends Schema {
   @type("string") userId: string;

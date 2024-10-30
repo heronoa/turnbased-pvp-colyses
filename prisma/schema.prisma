@@ -50,6 +50,8 @@ model Skill {
     baseDamage Int?
     type       SkillType
     baseCost   Int
+    countdown  Int
+    channeling Int?
 
     Character   Character? @relation(fields: [characterId], references: [id])
     characterId String?    @db.ObjectId
