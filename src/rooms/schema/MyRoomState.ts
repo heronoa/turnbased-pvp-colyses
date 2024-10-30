@@ -105,6 +105,17 @@ export class BotPlayerSchema extends PlayerSchema {
   }
 }
 
+export class SkillSchema extends Schema {
+  @type("string") id = "";
+  @type("string") name: string;
+  @type("number") duration = 0;
+  @type("string") effect: string;
+  @type("number") baseDamage = 0;
+  @type("string") type: string;
+  @type("number") baseCost = 0;
+  @type("number") countdown = 0;
+  @type("number") channeling = 0;
+}
 export class ActionSchema extends Schema {
   @type("string") action: string;
   @type("string") player: string;

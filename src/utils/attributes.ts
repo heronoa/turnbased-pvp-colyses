@@ -38,6 +38,7 @@ const comumInitialSkills = [
     baseDamage: 1,
     type: "BLUNT",
     baseCost: 1,
+    countdown: 0,
   },
   {
     name: "Kick",
@@ -45,6 +46,7 @@ const comumInitialSkills = [
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
+    countdown: 0,
   },
   {
     name: "Wait",
@@ -52,6 +54,7 @@ const comumInitialSkills = [
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
+    countdown: 0,
   },
   {
     name: "Guard",
@@ -59,6 +62,7 @@ const comumInitialSkills = [
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
+    countdown: 0,
   },
   {
     name: "Evade",
@@ -66,6 +70,7 @@ const comumInitialSkills = [
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
+    countdown: 0,
   },
 ];
 

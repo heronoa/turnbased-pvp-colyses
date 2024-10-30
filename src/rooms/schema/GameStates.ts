@@ -1,8 +1,10 @@
+import { InitialSkills } from "../../utils/attributes";
 import { attributesCalculations } from "../../utils/calculations";
 import {
   ActionSchema,
   BotPlayerSchema,
   PlayerSchema,
+  SkillSchema,
   WinnerSchema,
 } from "./MyRoomState";
 
@@ -114,18 +116,20 @@ export class BotPlayer extends Player {
     super(playerName, attributes);
   }
   randomAction() {
-    const possibleActions = ["atk", "brk"];
-
-    possibleActions.push("sp");
-
-    if (this.hasShield) {
-      possibleActions.push("def");
-    }
+    const possibleActions = InitialSkills.warrior as Skill[];
 
     const actionChoosed =
       possibleActions[Math.floor(Math.random() * possibleActions.length)];
 
-    return actionChoosed;
+    const skillChoosed = JSON.stringify(actionChoosed);
+
+    return skillChoosed;
+  }
+}
+
+export class SkillClass extends SkillSchema {
+  constructor(skill: Skill) {
+    super(skill);
   }
 }
 

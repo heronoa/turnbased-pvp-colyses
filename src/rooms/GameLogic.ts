@@ -1,9 +1,10 @@
 import { attributesCalculations } from "../utils/calculations";
 import { MyRoom } from "./MyRoom";
-import { Action, BotPlayer, Winner } from "./schema/GameStates";
+import { Action, BotPlayer, Skill, Winner } from "./schema/GameStates";
 import {
   BotPlayerSchema,
   MyRoomState,
+  SkillSchema,
   WinnerSchema,
 } from "./schema/MyRoomState";
 import { DBActions } from "./DBActions";
@@ -334,216 +335,65 @@ export class GameLogic {
       actionArr
     );
 
-    const actionsMsgArr = Array.from(room.state.actions.values()).map((e) => {
-      const player = room.state.players.get(e.player);
-      const opponentKey = Array.from(room.state.players.keys()).find(
-        (k: string) => k !== e.player
-      );
-      const opponent = room.state.players.get(opponentKey);
+    const actionsMsgArr = Array.from(room.state.actions.values()).map(
+      (playerAction) => {
+        const skill = JSON.parse(playerAction.action) as Skill;
+        const player = room.state.players.get(playerAction.player);
+        const opponentKey = Array.from(room.state.players.keys()).find(
+          (k: string) => k !== playerAction.player
+        );
+        const opponent = room.state.players.get(opponentKey);
 
-      player.afkClear();
+        player.afkClear();
 
-      const finalMsg = `${e.player}: `;
+        const finalMsg = `${playerAction.player}: `;
 
-      switch (e.action) {
-        case "atk": {
-          const isHit = isHitMap.get(e.player);
+        switch (skill.effect) {
+          case "BUFF": {
+            const isHit = isHitMap.get(playerAction.player);
 
-          const opponentNotDef =
-            room?.state.actions?.get(opponentKey)?.action !== "def";
+            const msg = `${player.playerName}@${skill.name}@${
+              isHit ? "suc" : "miss"
+            }`;
+            room.broadcast("action", { msg: finalMsg + msg });
 
-          if (opponentNotDef) {
-            if (player.hasCA) {
-              const damageMsg = opponent.receiveDamage(player.damage);
-              player.deactivateCA();
-
-              room.broadcast("action", {
-                msg: finalMsg + damageMsg,
-                damageTaken: player.damage,
-              });
-              return {
-                ...e,
-                resultMsg: {
-                  msg: finalMsg + damageMsg,
-                  damageTaken: player.damage,
-                },
-              };
-            }
+            return { ...playerAction, resultMsg: { msg: finalMsg + msg } };
+          }
+          case "DAMAGE": {
+            const isHit = isHitMap.get(playerAction.player);
+            let damage = 0;
 
             if (isHit) {
-              const damageMsg = opponent.receiveDamage(player.damage);
-
-              room.broadcast("action", { msg: finalMsg + damageMsg });
-              return { ...e, resultMsg: { msg: finalMsg + damageMsg } };
-            }
-            player.deactivateCA();
-
-            const msg = `${player.playerName}@atk@miss`;
-
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-
-          if (!opponentNotDef && isDefend) {
-            player.deactivateCA();
-            const msg = `${player.playerName}@atk@defended`;
-
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-          if (isHit || player.hasCA) {
-            // console.log({
-            //   CA: player.hasCA,
-            //   damage: player.damage,
-            //   baseDamage: player.baseDamage,
-            // });
-
-            const damageMsg = opponent.receiveDamage(player.damage);
-            player.deactivateCA();
-
-            room.broadcast("action", {
-              msg: finalMsg + damageMsg,
-              damageTaken: player.damage,
-            });
-            return {
-              ...e,
-              resultMsg: {
-                msg: finalMsg + damageMsg,
-                damageTaken: player.damage,
-              },
-            };
-          } else {
-            player.deactivateCA();
-
-            const msg = `${player.playerName}@atk@miss`;
-            room.broadcast("action", { msg: finalMsg + msg });
-
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-        }
-        case "sp": {
-          player.specialUsed(1);
-          const isHit = isHitMap.get(e.player);
-
-          const opponentNotDef =
-            room?.state.actions?.get(opponentKey)?.action !== "def";
-
-          if (opponentNotDef) {
-            if (player.hasCA) {
-              const damageMsg = opponent.receiveDamage(player.specialDamage);
-
-              player.deactivateCA();
-
-              room.broadcast("action", {
-                msg: finalMsg + damageMsg,
-                damageTaken: player.specialDamage,
-              });
-              return {
-                ...e,
-                resultMsg: {
-                  msg: finalMsg + damageMsg,
-                  damageTaken: player.specialDamage,
-                },
-              };
+              damage = skill.baseDamage + player.damage;
+              opponent.receiveDamage(damage);
             }
 
-            if (isHit) {
-              const damageMsg = opponent.receiveDamage(player.specialDamage);
-              room.broadcast("action", {
-                msg: finalMsg + damageMsg,
-                damageTaken: player.specialDamage,
-              });
-              return {
-                ...e,
-                resultMsg: {
-                  msg: finalMsg + damageMsg,
-                  damageTaken: player.specialDamage,
-                },
-              };
-            }
-            player.deactivateCA();
-
-            const msg = `${player.playerName}@sp@miss`;
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-
-          if (!opponentNotDef && isDefend) {
-            player.deactivateCA();
-
-            const msg = `${player.playerName}@sp@defended`;
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-          if (isHit || player.hasCA) {
-            const damageMsg = opponent.receiveDamage(player.specialDamage);
-            player.deactivateCA();
-
-            room.broadcast("action", {
-              msg: finalMsg + damageMsg,
-              damageTaken: player.specialDamage,
-            });
-            return {
-              ...e,
-              resultMsg: {
-                msg: finalMsg + damageMsg,
-                damageTaken: player.specialDamage,
-              },
-            };
-          } else {
-            player.deactivateCA();
-
-            const msg = `${player.playerName}@sp@miss`;
-
+            const msg = `${player.playerName}@${skill.name}@${
+              isHit ? "suc" : "miss"
+            }@${damage}`;
             room.broadcast("action", { msg: finalMsg + msg });
 
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
+            return { ...playerAction, resultMsg: { msg: finalMsg + msg } };
           }
+          case "STATUS": {
+            const isHit = isHitMap.get(playerAction.player);
+
+            const msg = `${player.playerName}@${skill.name}@${
+              isHit ? "suc" : "miss"
+            }`;
+            room.broadcast("action", { msg: finalMsg + msg });
+
+            return { ...playerAction, resultMsg: { msg: finalMsg + msg } };
+          }
+
+          case undefined: {
+            console.log("ERROR: ", { e: JSON.stringify(playerAction) });
+          }
+          default:
+            console.log("ERROR: ", { e: JSON.stringify(playerAction) });
         }
-        case "def": {
-          player.deactivateCA();
-          const opponentKey = Array.from(room.state.players.keys()).find(
-            (k: string) => k !== e.player
-          );
-
-          const opponentIsAttaking = ["atk", "sp"].includes(
-            room?.state.actions?.get(opponentKey)?.action
-          );
-
-          if (opponentIsAttaking && isDefend) {
-            const CAMsg = player.activateCA();
-            room.broadcast("action", { msg: finalMsg + CAMsg });
-            return { ...e, resultMsg: { msg: finalMsg + CAMsg } };
-          } else {
-            const msg = `${e.player}@def@miss`;
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-        }
-
-        case "brk": {
-          player.deactivateCA();
-          const opponentKey = Array.from(room.state.players.keys()).find(
-            (k: string) => k !== e.player
-          );
-
-          if (room?.state.actions?.get(opponentKey)?.action === "def") {
-            const msg = opponent.breakShield();
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          } else {
-            const msg = `${e.player}@brk@miss`;
-            room.broadcast("action", { msg: finalMsg + msg });
-            return { ...e, resultMsg: { msg: finalMsg + msg } };
-          }
-        }
-        case undefined: {
-          console.log("ERROR: ", { e: JSON.stringify(e) });
-        }
-        default:
-          console.log("ERROR: ", { e: JSON.stringify(e) });
       }
-    });
+    );
 
     this.sendMessages(room, actionsMsgArr);
 
@@ -564,20 +414,11 @@ export class GameLogic {
     }[]
   ) {
     room.clients.forEach((c: MyRoom["clients"][0]) => {
-      const {
-        playerMsg,
-        opponentMsg,
-        playerRawMsg,
-        playerDamageTaken,
-        opponentDamageTaken,
-      } = this.buildMsg(msgArrs, c.sessionId);
+      const { playerMsg, opponentMsg } = this.buildMsg(msgArrs, c.sessionId);
 
       c.send("action", {
         playerMsg,
         opponentMsg,
-        playerRawMsg,
-        playerDamageTaken,
-        opponentDamageTaken,
       });
     });
   }
@@ -595,52 +436,45 @@ export class GameLogic {
   ): {
     playerMsg: string;
     opponentMsg: string;
-    playerRawMsg: string;
-    playerDamageTaken: number;
-    opponentDamageTaken: number;
   } {
-    const ownerMsg = msgArrs.find((m) => m.player === sessionId) || {
-      resultMsg: { msg: "afk", damageTaken: 0 },
-    };
-    const opponentMsg = msgArrs.find((m) => m.player !== sessionId) || {
-      resultMsg: { msg: "afk", damageTaken: 0 },
-    };
+    const ownerMsg = msgArrs.find((m) => m.player === sessionId);
+    const opponentMsg = msgArrs.find((m) => m.player !== sessionId);
+    let ownerMessageFinal = "Turn pass without your action",
+      opponentMessageFinal = "Turn pass without you opponent take action";
 
-    const { opponentMessageFinal, ownerMessageFinal } = handleBattleMessage({
-      owner: {
-        ownerIsAttacking:
-          ownerMsg.resultMsg.msg.includes("atk") ||
-          ownerMsg.resultMsg.msg.includes("sp"),
-        ownerIsCA: ownerMsg.resultMsg.msg.includes("@ca@"),
-        ownerIsBreakingBlock: ownerMsg.resultMsg.msg.includes("brk"),
-        ownerIsSpecialing: ownerMsg.resultMsg.msg.includes("sp"),
-        ownerIsDefending: ownerMsg.resultMsg.msg.includes("@def@"),
-        ownerIsMissed: ownerMsg.resultMsg.msg.includes("miss"),
-        ownerIsAFK: ownerMsg.resultMsg.msg === "afk",
-      },
-      opponent: {
-        opponentIsAttacking:
-          opponentMsg.resultMsg.msg.includes("atk") ||
-          opponentMsg.resultMsg.msg.includes("sp"),
-
-        opponentIsCA: opponentMsg.resultMsg.msg.includes("@ca@"),
-        opponentIsBreakingBlock: opponentMsg.resultMsg.msg.includes("brk"),
-        opponentIsSpecialing: opponentMsg.resultMsg.msg.includes("sp"),
-        opponentIsDefending: opponentMsg.resultMsg.msg.includes("@def@"),
-        opponentIsMissed: opponentMsg.resultMsg.msg.includes("miss"),
-        opponentIsAFK: opponentMsg.resultMsg.msg === "afk",
-      },
-      damageDealt: Number(ownerMsg.resultMsg.msg.split("@")?.[3] || -1) || -1,
-      damagePersisted:
-        Number(opponentMsg.resultMsg.msg.split("@")?.[3] || -1) || -1,
-    });
-
+    if (ownerMsg) {
+      const [
+        caster = undefined,
+        action = undefined,
+        result = undefined,
+        damage = undefined,
+      ] = ownerMsg?.resultMsg?.msg.split("@");
+      ownerMessageFinal = `${caster} use ${action}!${
+        result === "miss"
+          ? " But Miss"
+          : Number(damage) > 0
+          ? ` And deal ${damage} for damage`
+          : " Successfully"
+      }`;
+    }
+    if (opponentMsg) {
+      const [
+        caster = undefined,
+        action = undefined,
+        result = undefined,
+        damage = undefined,
+      ] = opponentMsg?.resultMsg?.msg.split("@");
+      opponentMessageFinal = `${caster} use ${action}!${
+        result === "miss"
+          ? " But Miss"
+          : Number(damage) > 0
+          ? ` And deal ${damage} for damage`
+          : " Successfully"
+      }`;
+    }
     return {
       playerMsg: ownerMessageFinal,
       opponentMsg: opponentMessageFinal,
-      playerRawMsg: ownerMsg.resultMsg.msg,
-      playerDamageTaken: ownerMsg.resultMsg?.damageTaken || -1,
-      opponentDamageTaken: opponentMsg.resultMsg?.damageTaken || -1,
     };
   }
 
@@ -651,13 +485,15 @@ export class GameLogic {
 
     const bot = room.state.players.get(opponentKey) as BotPlayer;
 
-    const rAction = bot.randomAction();
+    console.log({ bot });
 
-    const botAction = new Action(bot.playerName, rAction).assign({
-      action: rAction,
-      player: bot.playerName,
-    });
+    const rAction = bot.randomAction();
+    console.log({ rAction });
+
+    const botAction = new Action(bot.playerName, rAction);
+    console.log({ botAction });
 
     room.state.actions.set(botAction.player, botAction);
+    console.log("finished");
   }
 }

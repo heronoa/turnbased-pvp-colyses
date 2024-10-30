@@ -101,17 +101,6 @@ model Character {
 //     created_at DateTime    @default(now())
 // }
 
-model Pet {
-    id          String   @id @default(auto()) @map("_id") @db.ObjectId
-    assetId     String   @unique
-    wallet      String
-    GameHistory String[]
-    updated_at  DateTime @updatedAt
-    created_at  DateTime @default(now())
-
-    @@map("pet")
-}
-
 model Player {
     id          String   @id @default(auto()) @map("_id") @db.ObjectId
     wallet      String   @unique

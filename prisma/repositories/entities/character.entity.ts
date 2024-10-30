@@ -12,7 +12,8 @@ export class Character implements Prisma.CharacterUncheckedCreateInput {
   characterAttributeId?: string;
   CharacterAttribute?: Prisma.CharacterAttributeUncheckedCreateNestedOneWithoutCharacterInput;
   id?: string;
-  
+  userId: any;
+  skill?: any;
 
   constructor(partial: Partial<Character>) {
     Object.assign(this, partial);

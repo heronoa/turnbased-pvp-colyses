@@ -1,11 +1,9 @@
 import { MyRoom } from "./MyRoom";
 import { BotPlayer, Player, Winner } from "./schema/GameStates";
-import { Pet } from "../../prisma/repositories/entities/pet.entity";
 import { Player as DBPlayer } from "../../prisma/repositories/entities/player.entity";
 import { GamesPrismaORMRepository } from "../../prisma/repositories/game.repository";
 import { PlayersPrismaORMRepository } from "../../prisma/repositories/player.repository";
 import { PlayerSchema } from "./schema/MyRoomState";
-import { PetsPrismaORMRepository } from "../../prisma/repositories/pet.repository";
 import { Game } from "../../prisma/repositories/entities/game.entity";
 
 export class DBActions {

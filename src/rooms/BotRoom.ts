@@ -5,11 +5,13 @@ import {
   BotPlayer,
   ICharacterInitial,
   Player,
+  Skill,
 } from "./schema/GameStates";
 import { Delayed } from "colyseus";
 import { GameLogic } from "./GameLogic";
 import { MockedJoinOptions } from "./schema/MockedData";
 import { DBActions } from "./DBActions";
+import { prismaClient } from "../../prisma/repositories/prismaClient";
 
 export class BotRoom extends Room<MyRoomState> {
   turnTimer = 25;
@@ -39,56 +41,24 @@ export class BotRoom extends Room<MyRoomState> {
     this.onMessage("chat", (client, message) => {
       this.broadcast("chat", `${client.sessionId}: ${message.data}`);
     });
-    this.onMessage("atk", (client) => {
+    this.onMessage("action", async (client, message: Skill) => {
+      console.log({ message });
       if (this.state.actions.get(client.sessionId)) {
         return client.send("warn", "you already take a action");
       }
 
-      const newAction = new Action(client.sessionId, "atk");
+      const skill = JSON.stringify(message);
+      console.log({ skill });
+
+      const newAction = new Action(client.sessionId, skill as string);
+
+      console.log({ newAction });
       this.state.actions.set(newAction.player, newAction);
 
-      GameLogic.inputBotAction(this, newAction.player);
-    });
-    this.onMessage("def", (client) => {
-      if (!this.state.players.get(client.sessionId).hasShield) {
-        const p = this.state.players.get(client.sessionId);
-        const defCoutdown = p.maxBreakSequel - p.breakSequel;
-        return client.send(
-          "warn",
-          `your shield is broken wait ${defCoutdown} turn${
-            defCoutdown > 1 ? "s" : ""
-          }`
-        );
-      }
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
-
-      const newAction = new Action(client.sessionId, "def");
-      this.state.actions.set(newAction.player, newAction);
+      console.log("bot action");
 
       GameLogic.inputBotAction(this, newAction.player);
-    });
-    this.onMessage("brk", (client) => {
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
-
-      const newAction = new Action(client.sessionId, "brk");
-      this.state.actions.set(newAction.player, newAction);
-
-      GameLogic.inputBotAction(this, newAction.player);
-    });
-    this.onMessage("sp", (client) => {
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
-
-      const newAction = new Action(client.sessionId, "sp");
-
-      this.state.actions.set(newAction.player, newAction);
-
-      GameLogic.inputBotAction(this, newAction.player);
+      console.log("Finished");
     });
   }
 
@@ -131,17 +101,24 @@ export class BotRoom extends Room<MyRoomState> {
         }
 
         if (this.state.actions.size === 1) {
+          console.log("Received all player actions");
           const rAction = bot.randomAction();
+
+          console.log("Bot Random Action", rAction);
 
           const botAction = new Action(bot.playerName, rAction).assign({
             action: rAction,
             player: bot.playerName,
           });
+          console.log("Bot Random Class Action", botAction);
 
           this.state.actions.set(botAction.player, botAction);
+          console.log("Input bot action");
         }
 
         if (this.state.actions.size > 1 || this.state.countdown === 0) {
+          console.log("Resolving Actions");
+
           GameLogic.resolveActions(this);
         }
 

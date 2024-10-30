@@ -26,49 +26,21 @@ export class ResolveActionsLogic {
     const isHitMap: Map<string, boolean> = new Map();
     let isDefend: boolean = false;
 
-    if (
-      actionArr.find((ac) => ac.action === "atk") ||
-      actionArr.find((ac) => ac.action === "sp")
-    ) {
-      actionArr
-        .filter((ac) => ["atk", "sp"].includes(ac.action))
-        .forEach((ac) => {
-          const attacker = room.state.players.get(ac.player);
-          const opponentKey = Array.from(room.state.players.keys()).find(
-            (k: string) => k !== ac.player
-          );
-          const opponent = room.state.players.get(opponentKey);
-          const random = attributesCalculations.generateRadintBetween(1, 100);
-
-          const odd =
-            ac.action === "atk"
-              ? opponent.meleeDodgeOdd
-              : opponent.specialDodgeOdd;
-          isHitMap.set(attacker.playerName, attacker.hasCA || random < odd);
-        });
-    }
-
-    if (
-      actionArr.find((ac) => ac.action === "def") &&
-      (actionArr.find((ac) => ac.action === "atk") ||
-        actionArr.find((ac) => ac.action === "sp"))
-    ) {
-      const defender = room.state.players.get(
-        actionArr.find((ac) => ac.action === "def").player
+    actionArr.forEach((ac) => {
+      const attacker = room.state.players.get(ac.player);
+      const opponentKey = Array.from(room.state.players.keys()).find(
+        (k: string) => k !== ac.player
       );
-
+      const opponent = room.state.players.get(opponentKey);
       const random = attributesCalculations.generateRadintBetween(1, 100);
 
-      const attackerAction =
-        actionArr.find((ac) => ac.action === "atk") ||
-        actionArr.find((ac) => ac.action === "sp");
+      console.log({ ac });
 
-      const odd =
-        attackerAction.action === "atk"
-          ? defender.meleeDefOdd
-          : defender.specialDefOdd;
-      isDefend = !isHitMap.get(attackerAction.player) || random < odd;
-    }
+      const odd = ["BLUNT", "CUT", "PIERCE"].includes(ac.action?.type)
+        ? opponent.meleeDodgeOdd
+        : opponent.specialDodgeOdd;
+      isHitMap.set(attacker.playerName, attacker.hasCA || random < odd);
+    });
 
     return [isHitMap, isDefend];
   }

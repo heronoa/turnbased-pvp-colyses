@@ -1,6 +1,6 @@
 import { Room, Client } from "@colyseus/core";
 import { MyRoomState } from "./schema/MyRoomState";
-import { Action, ICharacterInitial, Player } from "./schema/GameStates";
+import { Action, ICharacterInitial, Player, Skill } from "./schema/GameStates";
 import { Delayed } from "colyseus";
 import { GameLogic } from "./GameLogic";
 import { MockedJoinOptions } from "./schema/MockedData";
@@ -34,47 +34,18 @@ export class MyRoom extends Room<MyRoomState> {
     this.onMessage("chat", (client, message) => {
       this.broadcast("chat", `${client.sessionId}: ${message.data}`);
     });
-    this.onMessage("atk", (client) => {
+
+    this.onMessage("action", (client, message) => {
+      console.log({ message });
       if (this.state.actions.get(client.sessionId)) {
         return client.send("warn", "you already take a action");
       }
 
-      const newAction = new Action(client.sessionId, "atk");
-      this.state.actions.set(newAction.player, newAction);
-    });
-    this.onMessage("def", (client) => {
-      if (!this.state.players.get(client.sessionId).hasShield) {
-        const p = this.state.players.get(client.sessionId);
-        const defCoutdown = p.maxBreakSequel - p.breakSequel;
-        return client.send(
-          "warn",
-          `your shield is broken wait ${defCoutdown} turn${
-            defCoutdown > 1 ? "s" : ""
-          }`
-        );
-      }
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
+      const skill = JSON.parse(message);
 
-      const newAction = new Action(client.sessionId, "def");
-      this.state.actions.set(newAction.player, newAction);
-    });
-    this.onMessage("brk", (client) => {
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
+      const newAction = new Action(client.sessionId, skill as Skill);
 
-      const newAction = new Action(client.sessionId, "brk");
-      this.state.actions.set(newAction.player, newAction);
-    });
-    this.onMessage("sp", (client) => {
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
-
-      const newAction = new Action(client.sessionId, "sp");
-
+      console.log({ newAction });
       this.state.actions.set(newAction.player, newAction);
     });
   }
