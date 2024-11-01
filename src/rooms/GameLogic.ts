@@ -358,8 +358,6 @@ export class GameLogic {
 
         player.afkClear();
 
-        const finalMsg = `${playerAction.player}: `;
-
         switch (skill.effect) {
           case "BUFF": {
             const isHit = isHitMap.get(playerAction.player);
@@ -372,8 +370,6 @@ export class GameLogic {
 
               // const factors = JSON.stringify(skill.factors);
 
-              console.log({ name: skill.name });
-
               const status = new StatusSchema({
                 damage,
                 factors: skill?.factors || "{}",
@@ -384,12 +380,14 @@ export class GameLogic {
               player.addStatus(status);
             }
 
-            const msg = `${player.playerName}@${skill.name}@${
-              isHit ? "suc" : "miss"
-            }`;
-            room.broadcast("action", { msg: finalMsg + msg });
+            const username = player.userId.split("@")[0];
 
-            return { ...playerAction, resultMsg: { msg: finalMsg + msg } };
+            console.log({ caster: username, name: skill.name });
+
+            const msg = `${username}@${skill.name}@${isHit ? "suc" : "miss"}`;
+            room.broadcast("action", { msg });
+
+            return { ...playerAction, resultMsg: { msg } };
           }
           case "DAMAGE": {
             const isHit = isHitMap.get(playerAction.player);
@@ -411,12 +409,15 @@ export class GameLogic {
               opponent.receiveDamage(damage);
             }
 
-            const msg = `${player.playerName}@${skill.name}@${
+            const username = player.userId.split("@")[0];
+
+            const msg = `${username}@${skill.name}@${
               isHit ? "suc" : "miss"
             }@${damage}`;
-            room.broadcast("action", { msg: finalMsg + msg });
+            room.broadcast("action", { msg });
+            console.log({ caster: username, name: skill.name });
 
-            return { ...playerAction, resultMsg: { msg: finalMsg + msg } };
+            return { ...playerAction, resultMsg: { msg } };
           }
           case "STATUS": {
             const isHit = isHitMap.get(playerAction.player);
@@ -440,12 +441,14 @@ export class GameLogic {
               opponent.addStatus(status);
             }
 
-            const msg = `${player.playerName}@${skill.name}@${
-              isHit ? "suc" : "miss"
-            }`;
-            room.broadcast("action", { msg: finalMsg + msg });
+            const username = player.userId.split("@")[0];
 
-            return { ...playerAction, resultMsg: { msg: finalMsg + msg } };
+            console.log({ caster: username, name: skill.name });
+
+            const msg = `${username}@${skill.name}@${isHit ? "suc" : "miss"}`;
+            room.broadcast("action", { msg });
+
+            return { ...playerAction, resultMsg: { msg } };
           }
 
           case undefined: {

@@ -54,7 +54,7 @@ export class ResolveActionsLogic {
           console.log({ dodgeOdd, hitOdd });
           isHitMap.set(
             attacker.playerName,
-            random < dodgeOdd && random < hitOdd
+            random > dodgeOdd && random < hitOdd
           );
         }
         case "BUFF": {
@@ -79,7 +79,7 @@ export class ResolveActionsLogic {
 
           isHitMap.set(
             attacker.playerName,
-            random < dodgeOdd && random < hitOdd
+            random > dodgeOdd && random < hitOdd
           );
         }
       }
