@@ -29,7 +29,7 @@ authRouter.post("/login", async (req: any, res: any) => {
       password,
     });
 
-    console.log({ token, user });
+    // console.log({ token, user });
 
     if (token && user) {
       res.status(200).json({ token, user });

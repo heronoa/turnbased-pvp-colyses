@@ -13,8 +13,6 @@ export class AuthController {
     try {
       const payload = jwt.verify(token, process.env.SECRET) as JwtPayload;
 
-      console.log("JWT PAYLOAD", { payload });
-
       const userRepository = new UsersPrismaORMRepository();
 
       if (payload?.id) {
@@ -38,7 +36,6 @@ export class AuthController {
     if (userExists) {
       cryptResult = await bcrypt.compare(password, userExists.password);
 
-      console.log({ cryptResult });
       if (cryptResult) {
         const id = userExists.id;
         const token = jwt.sign({ id }, process.env.SECRET, {

@@ -17,6 +17,20 @@ characterRouter.post("/search", async (req: any, res: any) => {
   }
 });
 
+characterRouter.delete("/delete", async (req: any, res: any) => {
+  const { characterId } = req.body;
+  console.log({ body: req.body, data: req.data });
+
+  try {
+    await CharacterController.deleteCharacter(characterId);
+
+    res.status(200).json({ msg: "Character deleted sucessfully" });
+  } catch (err) {
+    console.log({ err });
+    res.status(500).json({ msg: "error on find character" });
+  }
+});
+
 characterRouter.post("/create", async (req: any, res: any) => {
   const { name = undefined, classHero = undefined } = req.body;
 

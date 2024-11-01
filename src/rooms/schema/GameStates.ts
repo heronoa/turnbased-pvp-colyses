@@ -22,12 +22,21 @@ type SkillType =
 export interface Skill {
   id: string;
   name: string;
-  duration?: string;
+  duration?: number;
   effect: Effect;
   baseDamage?: number;
   type: SkillType;
   baseCost: number;
   countdown: number;
+  factors?: string;
+  // {
+  //   strength?: number;
+  //   dexterity?: number;
+  //   resistence?: number;
+  //   vitality?: number;
+  //   willpower?: number;
+  //   intelligence?: number;
+  // };
   channeling?: number;
 }
 export interface ICharacterInitial {
@@ -50,6 +59,7 @@ export interface ICharacterInitial {
 export class Player extends PlayerSchema {
   constructor(playerName: string, attributes: ICharacterInitial) {
     super(playerName, attributes);
+    this.status = [];
     this.player_db_id = attributes.player_db_id;
     this.userId = attributes.userId;
     this.playerName = playerName;
@@ -72,11 +82,17 @@ export class Player extends PlayerSchema {
     );
     this.hp = this.max_hp;
     this.strength = attributes.character.strength;
+    this.resistence = attributes.character.resistence;
     this.intelligence = attributes.character.intelligence;
-
     this.dexterity = attributes.character.dexterity;
-
     this.willpower = attributes.character.willpower;
+    this.vitality = attributes.character.vitality;
+    this.base_strength = attributes.character.strength;
+    this.base_resistence = attributes.character.resistence;
+    this.base_intelligence = attributes.character.intelligence;
+    this.base_dexterity = attributes.character.dexterity;
+    this.base_willpower = attributes.character.willpower;
+    this.base_vitality = attributes.character.vitality;
     this.damage = attributesCalculations.calcDamageMelee(
       this.strength,
       this.dexterity

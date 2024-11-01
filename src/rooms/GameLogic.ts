@@ -5,6 +5,7 @@ import {
   BotPlayerSchema,
   MyRoomState,
   SkillSchema,
+  StatusSchema,
   WinnerSchema,
 } from "./schema/MyRoomState";
 import { DBActions } from "./DBActions";
@@ -95,7 +96,7 @@ export class GameLogic {
     // console.log("Determine Round Winner 1");
     const playersArr = Array.from(room.state.players.values());
 
-    console.log(playersArr);
+    // console.log(playersArr);
     const awayPlayers = playersArr.filter(
       (p) => p.afkSequel >= room.maxAfkSequel
     );
@@ -330,13 +331,24 @@ export class GameLogic {
     const actionArr = Array.from(room.state.actions.values());
 
     ResolveActionsLogic.handleAfkAction(room, actionArr);
-    const [isHitMap, isDefend] = ResolveActionsLogic.handleCheckHit(
-      room,
-      actionArr
-    );
+    Array.from(room.state.players.values()).forEach((p) => p.resolveStatus());
+    const isHitMap = ResolveActionsLogic.handleCheckHit(room, actionArr);
 
-    const actionsMsgArr = Array.from(room.state.actions.values()).map(
-      (playerAction) => {
+    const actionsMsgArr = Array.from(room.state.actions.values())
+      .sort((a, b) => {
+        if (
+          JSON.parse(a.action).type === "BUFF" &&
+          JSON.parse(b.action).type !== "BUFF"
+        )
+          return -1;
+        if (
+          JSON.parse(a.action).type !== "BUFF" &&
+          JSON.parse(b.action).type === "BUFF"
+        )
+          return 1;
+        return 0;
+      })
+      .map((playerAction) => {
         const skill = JSON.parse(playerAction.action) as Skill;
         const player = room.state.players.get(playerAction.player);
         const opponentKey = Array.from(room.state.players.keys()).find(
@@ -352,6 +364,26 @@ export class GameLogic {
           case "BUFF": {
             const isHit = isHitMap.get(playerAction.player);
 
+            if (isHit) {
+              const damage = attributesCalculations.calcStatusDamage(
+                skill.baseDamage,
+                player.willpower
+              );
+
+              // const factors = JSON.stringify(skill.factors);
+
+              console.log({ name: skill.name });
+
+              const status = new StatusSchema({
+                damage,
+                factors: skill?.factors || "{}",
+                type: skill.type,
+                duration: skill.duration || 0,
+              });
+
+              player.addStatus(status);
+            }
+
             const msg = `${player.playerName}@${skill.name}@${
               isHit ? "suc" : "miss"
             }`;
@@ -364,7 +396,18 @@ export class GameLogic {
             let damage = 0;
 
             if (isHit) {
-              damage = skill.baseDamage + player.damage;
+              damage = ["BLUNT", "PIERCE", "CUT"].includes(skill.type)
+                ? attributesCalculations.calcMeleeDamage(
+                    skill.type as "BLUNT" | "PIERCE" | "CUT",
+                    skill.baseDamage,
+                    player.strength,
+                    player.dexterity
+                  )
+                : attributesCalculations.calcSpecialDamage(
+                    skill.baseDamage,
+                    player.willpower,
+                    player.intelligence
+                  );
               opponent.receiveDamage(damage);
             }
 
@@ -377,6 +420,25 @@ export class GameLogic {
           }
           case "STATUS": {
             const isHit = isHitMap.get(playerAction.player);
+
+            if (isHit) {
+              const damage = attributesCalculations.calcStatusDamage(
+                skill.baseDamage,
+                player.willpower
+              );
+
+              // const factors = JSON.stringify(skill.factors);
+
+              console.log({ name: skill.name });
+
+              const status = new StatusSchema({
+                factors: skill?.factors || "{}",
+                type: skill.type,
+                duration: skill.duration || 0,
+              });
+
+              opponent.addStatus(status);
+            }
 
             const msg = `${player.playerName}@${skill.name}@${
               isHit ? "suc" : "miss"
@@ -392,8 +454,7 @@ export class GameLogic {
           default:
             console.log("ERROR: ", { e: JSON.stringify(playerAction) });
         }
-      }
-    );
+      });
 
     this.sendMessages(room, actionsMsgArr);
 
@@ -485,13 +546,9 @@ export class GameLogic {
 
     const bot = room.state.players.get(opponentKey) as BotPlayer;
 
-    console.log({ bot });
-
     const rAction = bot.randomAction();
-    console.log({ rAction });
 
     const botAction = new Action(bot.playerName, rAction);
-    console.log({ botAction });
 
     room.state.actions.set(botAction.player, botAction);
     console.log("finished");

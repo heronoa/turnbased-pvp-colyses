@@ -4,6 +4,7 @@ import { CharactersPrismaORMRepository } from "../../prisma/repositories/charact
 import bcrypt from "bcrypt";
 import { InitialAttributesByClass, InitialSkills } from "../utils/attributes";
 import { prismaClient } from "../../prisma/repositories/prismaClient";
+import { Skill } from "../rooms/schema/GameStates";
 
 interface ICharacters {
   heroClass: "warrior" | "scout" | "mage";
@@ -42,7 +43,7 @@ export class CharacterController {
             },
             skill: {
               createMany: {
-                data: InitialSkills[heroClass],
+                data: InitialSkills[heroClass] as Skill[],
               },
             },
           },
@@ -93,6 +94,18 @@ export class CharacterController {
       const characterRepo = new CharactersPrismaORMRepository();
 
       const character = await characterRepo.findCharactersById(characterId);
+
+      return character;
+    } catch (err) {
+      console.log({ err });
+    }
+  }
+
+  static async deleteCharacter(characterId: string) {
+    try {
+      const characterRepo = new CharactersPrismaORMRepository();
+
+      const character = await characterRepo.deleteCharacter(characterId);
 
       return character;
     } catch (err) {

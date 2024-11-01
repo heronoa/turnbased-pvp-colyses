@@ -45,13 +45,14 @@ model CharacterAttribute {
 model Skill {
     id         String    @id @default(auto()) @map("_id") @db.ObjectId
     name       String
-    duration   String?
+    duration   Int?
     effect     Effect
     baseDamage Int?
     type       SkillType
     baseCost   Int
     countdown  Int
     channeling Int?
+    factors    String?
 
     Character   Character? @relation(fields: [characterId], references: [id])
     characterId String?    @db.ObjectId

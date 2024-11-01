@@ -1,3 +1,5 @@
+import { Skill } from "../rooms/schema/GameStates";
+
 export const InitialAttributesByClass = {
   warrior: {
     hp: 10,
@@ -31,7 +33,7 @@ export const InitialAttributesByClass = {
   },
 };
 
-const comumInitialSkills = [
+const comumInitialSkills: Omit<Skill, "id">[] = [
   {
     name: "Punch",
     effect: "DAMAGE",
@@ -50,7 +52,7 @@ const comumInitialSkills = [
   },
   {
     name: "Wait",
-    effect: "DAMAGE",
+    effect: "STATUS",
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
@@ -58,19 +60,24 @@ const comumInitialSkills = [
   },
   {
     name: "Guard",
-    effect: "STATUS",
+    effect: "BUFF",
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
     countdown: 0,
+    factors: JSON.stringify({
+      resistence: 2,
+      dexterity: 4,
+    }),
   },
   {
     name: "Evade",
-    effect: "STATUS",
+    effect: "BUFF",
     baseDamage: 2,
     type: "BLUNT",
     baseCost: 2,
     countdown: 0,
+    factors: JSON.stringify({ resistence: 9, dexterity: -0.5 }),
   },
 ];
 
