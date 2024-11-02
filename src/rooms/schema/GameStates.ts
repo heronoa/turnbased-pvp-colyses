@@ -22,10 +22,11 @@ type SkillType =
 export interface Skill {
   id: string;
   name: string;
+  description: string;
   duration?: number;
   effect: Effect;
   baseDamage?: number;
-  type: SkillType;
+  type?: SkillType;
   baseCost: number;
   countdown: number;
   factors?: string;
@@ -67,10 +68,7 @@ export class Player extends PlayerSchema {
       attributes.character.intelligence,
       attributes.character.magicka
     );
-    this.mana = attributesCalculations.calcMana(
-      attributes.character.intelligence,
-      attributes?.character?.intelligence || 0
-    );
+    this.mana = this.maxMana;
     this.initialMana = attributesCalculations.calcMana(
       attributes.character.willpower,
       attributes.character.magicka
@@ -132,7 +130,9 @@ export class BotPlayer extends Player {
     super(playerName, attributes);
   }
   randomAction() {
-    const possibleActions = InitialSkills.warrior as Skill[];
+    const possibleActions = InitialSkills.warrior.filter(
+      (skill: Skill) => skill.baseCost <= this.mana
+    ) as Skill[];
 
     const actionChoosed =
       possibleActions[Math.floor(Math.random() * possibleActions.length)];

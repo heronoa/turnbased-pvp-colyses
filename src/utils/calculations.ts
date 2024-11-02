@@ -59,10 +59,8 @@ export class attributesCalculations {
     strength: number
   ) {
     return (
-      (damageReceived *
-        (((resistence * 2) / 3 +
-          this.generateRadintBetween(-1, dexterity / 2 + strength / 2)) /
-          100)) >>
+      ((resistence * 2) / 3 +
+        this.generateRadintBetween(-1, dexterity / 2 + strength / 2)) >>
       0
     );
   }

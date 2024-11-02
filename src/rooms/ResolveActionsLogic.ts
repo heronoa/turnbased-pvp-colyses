@@ -27,6 +27,13 @@ export class ResolveActionsLogic {
 
     actionArr.forEach((ac) => {
       const attacker = room.state.players.get(ac.player);
+
+      if (attacker.playerName === undefined) {
+        console.log("attacker:", JSON.stringify(attacker));
+        console.log("action:", JSON.stringify(ac));
+
+        return
+      }
       const opponentKey = Array.from(room.state.players.keys()).find(
         (k: string) => k !== ac.player
       );
@@ -38,17 +45,19 @@ export class ResolveActionsLogic {
       switch (skill.effect) {
         case "DAMAGE": {
           const hitOdd = ["BLUNT", "CUT", "PIERCE"].includes(skill?.type)
-            ? attributesCalculations.calcMeleeHitOdd(attacker.dexterity)
-            : attributesCalculations.calcSpecialHitOdd(attacker.intelligence);
+            ? attributesCalculations.calcMeleeHitOdd(attacker?.dexterity || 0)
+            : attributesCalculations.calcSpecialHitOdd(
+                attacker?.intelligence || 0
+              );
 
           const dodgeOdd = ["BLUNT", "CUT", "PIERCE"].includes(skill?.type)
             ? attributesCalculations.calcOddDodgeMelee(
-                opponent.willpower,
-                attacker.dexterity
+                opponent?.willpower,
+                opponent?.dexterity
               )
             : attributesCalculations.calcOddDodgeSpecial(
-                opponent.willpower,
-                attacker.dexterity
+                opponent?.willpower || 0,
+                opponent?.dexterity || 0
               );
 
           console.log({ dodgeOdd, hitOdd });
@@ -59,7 +68,7 @@ export class ResolveActionsLogic {
         }
         case "BUFF": {
           const hitOdd = attributesCalculations.calcBuffHitOdd(
-            attacker.willpower
+            attacker?.willpower || 0
           );
 
           console.log({ hitOdd });
@@ -68,11 +77,11 @@ export class ResolveActionsLogic {
         }
         case "STATUS": {
           const hitOdd = attributesCalculations.calcStatusHitOdd(
-            attacker.willpower
+            attacker?.willpower || 0
           );
 
           const dodgeOdd = attributesCalculations.calcStatusDodgeOdd(
-            opponent.willpower
+            opponent?.willpower || 0
           );
 
           console.log({ dodgeOdd, hitOdd });

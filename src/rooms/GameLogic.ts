@@ -264,7 +264,7 @@ export class GameLogic {
         "Game Over",
         matchWinner === "0"
           ? `Match end on draw`
-          : `${matchWinner} have won the match`
+          : `${matchWinner.split("@")[0]} have won the match`
       );
 
       const previousHistory = JSON.parse(room.state.history);
@@ -304,19 +304,6 @@ export class GameLogic {
       // console.log("Hasnt A Winner");
 
       room.state.currentTurn++;
-
-      const playersArr = Array.from(room.state.players.values());
-
-      playersArr.forEach((p) => {
-        p.replenishMana();
-        if (playersArr.filter((p) => !p.hasShield).length > 0) {
-          if (p.breakSequel === p.maxBreakSequel) {
-            p.recoverShield();
-          } else {
-            p.incrementBreakSequel();
-          }
-        }
-      });
     }
     room.state.countdown = room.turnTimer;
     room.refreshInterval.reset();
@@ -360,6 +347,8 @@ export class GameLogic {
 
         switch (skill.effect) {
           case "BUFF": {
+            player.specialUsed(skill?.baseCost || 0);
+
             const isHit = isHitMap.get(playerAction.player);
 
             if (isHit) {
@@ -390,11 +379,14 @@ export class GameLogic {
             return { ...playerAction, resultMsg: { msg } };
           }
           case "DAMAGE": {
+            player.specialUsed(skill?.baseCost || 0);
+
             const isHit = isHitMap.get(playerAction.player);
-            let damage = 0;
+            let basedamage = 0;
+            let resultDamage = 0;
 
             if (isHit) {
-              damage = ["BLUNT", "PIERCE", "CUT"].includes(skill.type)
+              basedamage = ["BLUNT", "PIERCE", "CUT"].includes(skill.type)
                 ? attributesCalculations.calcMeleeDamage(
                     skill.type as "BLUNT" | "PIERCE" | "CUT",
                     skill.baseDamage,
@@ -406,20 +398,22 @@ export class GameLogic {
                     player.willpower,
                     player.intelligence
                   );
-              opponent.receiveDamage(damage);
+              resultDamage = opponent.receiveDamage(basedamage);
             }
 
             const username = player.userId.split("@")[0];
 
             const msg = `${username}@${skill.name}@${
               isHit ? "suc" : "miss"
-            }@${damage}`;
+            }@${resultDamage}@${skill.type}`;
             room.broadcast("action", { msg });
             console.log({ caster: username, name: skill.name });
 
             return { ...playerAction, resultMsg: { msg } };
           }
           case "STATUS": {
+            player.specialUsed(skill?.baseCost || 0);
+
             const isHit = isHitMap.get(playerAction.player);
 
             if (isHit) {

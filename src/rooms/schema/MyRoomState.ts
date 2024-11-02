@@ -150,17 +150,28 @@ export class PlayerSchema extends Schema {
     });
   }
 
-  receiveDamage(damage: number): string {
+  receiveDamage(damage: number): number {
     const damageNegated = attributesCalculations.calcDamageNegated(
       damage,
       this.resistence,
       this.dexterity,
       this.strength
     );
-    const resultDamage = damage - damageNegated;
+
+    // const guardingNegation = damageNegated;
+    // const normalNegation = damageNegated;
+
+    // if (this.status.find((s) => s.factors)) {
+    //   console.log({ guardingNegation, resistence: this.resistence });
+    // } else {
+    //   console.log({ normalNegation, resistence: this.resistence });
+    // }
+
+    const resultDamage =
+      damage - damageNegated > 0 ? damage - damageNegated : 1;
     this.hp = this.hp - resultDamage < 0 ? 0 : this.hp - resultDamage;
 
-    return `${this.playerName}@atk@suc@${damage}@${this.hp}`;
+    return resultDamage;
   }
   receiveSpecialDamage(damage: number): string {
     const damageNegated = attributesCalculations.calcDamageNegated(

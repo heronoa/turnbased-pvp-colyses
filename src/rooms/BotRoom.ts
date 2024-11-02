@@ -48,6 +48,13 @@ export class BotRoom extends Room<MyRoomState> {
 
       const skill = JSON.stringify(message);
 
+      if (this.state.players.get(client.sessionId).mana < message.baseCost) {
+        return client.send(
+          "warn",
+          `You don't have enough magicka to use ${message.name}`
+        );
+      }
+
       const newAction = new Action(client.sessionId, skill as string);
 
       this.state.actions.set(newAction.player, newAction);
@@ -98,7 +105,6 @@ export class BotRoom extends Room<MyRoomState> {
         if (this.state.actions.size === 1) {
           const rAction = bot.randomAction();
 
-
           const botAction = new Action(bot.playerName, rAction).assign({
             action: rAction,
             player: bot.playerName,
@@ -108,7 +114,6 @@ export class BotRoom extends Room<MyRoomState> {
         }
 
         if (this.state.actions.size > 1 || this.state.countdown === 0) {
-
           GameLogic.resolveActions(this);
         }
 
