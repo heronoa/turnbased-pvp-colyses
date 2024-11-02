@@ -35,17 +35,23 @@ export class MyRoom extends Room<MyRoomState> {
       this.broadcast("chat", `${client.sessionId}: ${message.data}`);
     });
 
-    this.onMessage("action", (client, message) => {
+    this.onMessage("action", (client, message: Skill) => {
       console.log({ message });
       if (this.state.actions.get(client.sessionId)) {
         return client.send("warn", "you already take a action");
       }
 
-      const skill = JSON.parse(message);
+      const skill = JSON.stringify(message);
 
-      const newAction = new Action(client.sessionId, skill as Skill);
+      if (this.state.players.get(client.sessionId).mana < message.baseCost) {
+        return client.send(
+          "warn",
+          `You don't have enough magicka to use ${message.name}`
+        );
+      }
 
-      console.log({ newAction });
+      const newAction = new Action(client.sessionId, skill as string);
+
       this.state.actions.set(newAction.player, newAction);
     });
   }
