@@ -348,10 +348,10 @@ export class GameLogic {
         switch (skill.effect) {
           case "BUFF": {
             player.specialUsed(skill?.baseCost || 0);
-
+            const username = player.userId.split("@")[0];
             const isHit = isHitMap.get(playerAction.player);
 
-            if (isHit) {
+            if (isHit && skill?.baseCost > 0) {
               const damage = attributesCalculations.calcStatusDamage(
                 skill.baseDamage,
                 player.willpower
@@ -369,11 +369,11 @@ export class GameLogic {
               player.addStatus(status);
             }
 
-            const username = player.userId.split("@")[0];
-
             console.log({ caster: username, name: skill.name });
 
-            const msg = `${username}@${skill.name}@${isHit ? "suc" : "miss"}`;
+            const msg = `${username}@${skill.name}@${
+              isHit || skill?.baseCost < 0 ? "suc" : "miss"
+            }@${skill.baseCost}`;
             room.broadcast("action", { msg });
 
             return { ...playerAction, resultMsg: { msg } };
@@ -405,7 +405,7 @@ export class GameLogic {
 
             const msg = `${username}@${skill.name}@${
               isHit ? "suc" : "miss"
-            }@${resultDamage}@${skill.type}`;
+            }@${resultDamage}@${skill?.baseCost || 0}@${skill.type}`;
             room.broadcast("action", { msg });
             console.log({ caster: username, name: skill.name });
 
@@ -439,7 +439,9 @@ export class GameLogic {
 
             console.log({ caster: username, name: skill.name });
 
-            const msg = `${username}@${skill.name}@${isHit ? "suc" : "miss"}`;
+            const msg = `${username}@${skill.name}@${isHit ? "suc" : "miss"}@${
+              skill?.baseCost || 0
+            }`;
             room.broadcast("action", { msg });
 
             return { ...playerAction, resultMsg: { msg } };
@@ -506,6 +508,7 @@ export class GameLogic {
         action = undefined,
         result = undefined,
         damage = undefined,
+        cost = undefined,
       ] = ownerMsg?.resultMsg?.msg.split("@");
       ownerMessageFinal = `${caster} use ${action}!${
         result === "miss"
@@ -513,6 +516,12 @@ export class GameLogic {
           : Number(damage) > 0
           ? ` And deal ${damage} for damage`
           : " Successfully"
+      }${
+        Number(cost) === 0
+          ? ""
+          : Number(cost) > 0
+          ? ` And uses ${cost} Magicka`
+          : ` And recover ${cost} Magicka`
       }`;
     }
     if (opponentMsg) {
@@ -521,13 +530,22 @@ export class GameLogic {
         action = undefined,
         result = undefined,
         damage = undefined,
+        cost = undefined,
       ] = opponentMsg?.resultMsg?.msg.split("@");
       opponentMessageFinal = `${caster} use ${action}!${
         result === "miss"
           ? " But Miss"
+          : Number(damage) === 0
+          ? " Successfully"
           : Number(damage) > 0
           ? ` And deal ${damage} for damage`
-          : " Successfully"
+          : ` And Heal ${damage} HP`
+      }${
+        Number(cost) === 0
+          ? ""
+          : Number(cost) > 0
+          ? ` And uses ${cost} Magicka`
+          : ` And recover ${cost} Magicka`
       }`;
     }
     return {

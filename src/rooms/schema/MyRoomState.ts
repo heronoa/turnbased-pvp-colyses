@@ -9,10 +9,25 @@ export class StatusSchema extends Schema {
   @type("number") duration: number;
 }
 
+export class SkillCountdownSchema extends Schema {
+  @type("number") duration: number = 0;
+  @type("string") id: string;
+}
+
+export class SkillCountdown extends SkillCountdownSchema {
+  constructor(skill: Skill) {
+    super();
+    this.id = skill.id;
+    this.duration = skill.countdown;
+  }
+}
+
 export class PlayerSchema extends Schema {
   @type("string") userId: string;
   @type("string") player_db_id: string;
   @type({ array: StatusSchema }) status: StatusSchema[] = [];
+  @type({ map: SkillCountdownSchema }) skill_countdown =
+    new MapSchema<SkillCountdownSchema>();
 
   @type("boolean") connected: boolean = true;
   @type("number") hp: number;
@@ -46,12 +61,22 @@ export class PlayerSchema extends Schema {
   @type("number") initialMana: number;
   @type("number") manaRegen: number;
   @type("number") specialDamage: number;
-  @type("number") meleeOdd: number;
-  @type("number") meleeDefOdd: number;
-  @type("number") specialOdd: number;
-  @type("number") specialDefOdd: number;
-  @type("number") meleeDodgeOdd: number;
-  @type("number") specialDodgeOdd: number;
+
+  addSkillCountdown(skill: Skill) {
+    const skillCountdown = new SkillCountdown(skill);
+
+    this.skill_countdown.set(skill.id, skillCountdown);
+  }
+
+  resolveSkillCountdown() {
+    this.skill_countdown.forEach((cd) => {
+      cd.duration--;
+
+      if (cd.duration <= 0) {
+        this.skill_countdown.delete(cd.id);
+      }
+    });
+  }
 
   resolveFactors(factors: {
     strength: number;

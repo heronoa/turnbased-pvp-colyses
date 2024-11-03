@@ -73,7 +73,6 @@ export class Player extends PlayerSchema {
       attributes.character.willpower,
       attributes.character.magicka
     );
-    this.manaRegen = attributes.character.willpower;
     this.max_hp = attributesCalculations.calcMaxHp(
       attributes.character.hp,
       attributes?.character?.vitality
@@ -99,29 +98,7 @@ export class Player extends PlayerSchema {
     this.specialDamage = attributesCalculations.specialDamageCalc(
       attributes?.character?.intelligence || -1
     );
-
-    this.meleeOdd = attributesCalculations.calcOddAtkMelee(
-      this.dexterity,
-      this.willpower
-    );
-    this.meleeDefOdd = attributesCalculations.calcOddDefMelee(this.meleeOdd);
-
-    this.specialOdd = attributesCalculations.calcOddAtkSpecial(
-      this.intelligence,
-      this.willpower
-    );
-    this.specialDefOdd = attributesCalculations.calcOddDefSpecial(
-      this.specialOdd
-    );
-
-    this.meleeDodgeOdd = attributesCalculations.calcOddDodgeMelee(
-      this.willpower,
-      this.dexterity
-    );
-    this.specialDodgeOdd = attributesCalculations.calcOddDodgeSpecial(
-      this.willpower,
-      this.dexterity
-    );
+    this.skill_countdown;
   }
 }
 
