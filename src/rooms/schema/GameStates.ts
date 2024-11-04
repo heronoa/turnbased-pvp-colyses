@@ -26,9 +26,9 @@ export interface Skill {
   name: string;
   description: string;
   duration?: number;
-  effect: Effect;
+  effect: string;
   baseDamage?: number;
-  type?: SkillType;
+  type?: string;
   baseCost: number;
   countdown: number;
   factors?: string;
@@ -134,7 +134,7 @@ export class BotPlayer extends Player {
       possibleActions[Math.floor(Math.random() * possibleActions.length)];
 
     const skillChoosed = {
-      skill: JSON.stringify(actionChoosed),
+      skill: actionChoosed,
       movement: { x: (Math.random() * 3) >> 0, y: (Math.random() * 4) >> 0 },
     };
 
@@ -151,12 +151,12 @@ export class SkillClass extends SkillSchema {
 export class Action extends ActionSchema {
   constructor(
     playerName: string,
-    action: string,
+    action: Skill,
     movement?: { x: number; y: number }
   ) {
     super(playerName);
     this.player = playerName;
-    this.action = action;
+    this.action = new SkillClass(action);
     if (movement) this.movement = new MovementAction(movement);
   }
 }

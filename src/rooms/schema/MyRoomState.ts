@@ -1,6 +1,6 @@
 import { Schema, MapSchema, type } from "@colyseus/schema";
 import { attributesCalculations } from "../../utils/calculations";
-import { ICharacterInitial, Player, Skill } from "./GameStates";
+import { ICharacterInitial, Player, Skill, SkillClass } from "./GameStates";
 
 export class StatusSchema extends Schema {
   @type("number") damage?: number;
@@ -223,7 +223,9 @@ export class PlayerSchema extends Schema {
   }
 
   specialUsed(specialCost: number) {
-    this.mana -= specialCost;
+    const newMana = this.mana - specialCost;
+
+    return newMana > this.maxMana ? this.maxMana : newMana;
   }
 
   replenishHp() {
@@ -283,6 +285,7 @@ export class SkillSchema extends Schema {
   @type("string") id = "";
   @type("string") name: string;
   @type("number") duration = 0;
+  @type("string") description = "";
   @type("string") effect: string;
   @type("number") baseDamage = 0;
   @type("string") type: string;
@@ -296,7 +299,7 @@ export class MovementAction extends Schema {
   @type("number") y: number;
 }
 export class ActionSchema extends Schema {
-  @type("string") action: string;
+  @type(SkillSchema) action: SkillClass;
   @type("string") player: string;
   @type(MovementAction) movement?: MovementAction;
 }

@@ -55,7 +55,7 @@ export class BotRoom extends Room<MyRoomState> {
           return client.send("warn", "you already take a action");
         }
 
-        const skill = JSON.stringify(message.skill);
+        const skill = message.skill;
 
         const player = this.state.players.get(client.sessionId);
 
@@ -87,7 +87,7 @@ export class BotRoom extends Room<MyRoomState> {
 
         const newAction = new Action(
           client.sessionId,
-          skill as string,
+          skill,
           message?.movement
         );
 
@@ -149,7 +149,11 @@ export class BotRoom extends Room<MyRoomState> {
         if (this.state.actions.size === 1) {
           const rAction = bot.randomAction();
 
-          const botAction = new Action(bot.playerName, rAction.skill, rAction.movement)
+          const botAction = new Action(
+            bot.playerName,
+            rAction.skill,
+            rAction.movement
+          );
 
           this.state.actions.set(botAction.player, botAction);
         }

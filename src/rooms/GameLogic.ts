@@ -45,7 +45,7 @@ export class GameLogic {
     room: MyRoom,
     actionsMsgArr: {
       resultMsg: { msg: string; damageTaken?: number };
-      action: string;
+      action: Skill;
       player: string;
     }[],
     isHitMap: Map<string, boolean>
@@ -326,20 +326,12 @@ export class GameLogic {
 
     const actionsMsgArr = Array.from(room.state.actions.values())
       .sort((a, b) => {
-        if (
-          JSON.parse(a.action).type === "BUFF" &&
-          JSON.parse(b.action).type !== "BUFF"
-        )
-          return -1;
-        if (
-          JSON.parse(a.action).type !== "BUFF" &&
-          JSON.parse(b.action).type === "BUFF"
-        )
-          return 1;
+        if (a.action.type === "BUFF" && b.action.type !== "BUFF") return -1;
+        if (a.action.type !== "BUFF" && b.action.type === "BUFF") return 1;
         return 0;
       })
       .map((playerAction) => {
-        const skill = JSON.parse(playerAction.action) as Skill;
+        const skill = playerAction.action as Skill;
         const player = room.state.players.get(playerAction.player);
         const opponentKey = Array.from(room.state.players.keys()).find(
           (k: string) => k !== playerAction.player
@@ -494,7 +486,7 @@ export class GameLogic {
         msg: string;
         damageTaken?: number;
       };
-      action: string;
+      action: Skill;
       player: string;
     }[]
   ) {
@@ -514,7 +506,7 @@ export class GameLogic {
         msg: string;
         damageTaken?: number;
       };
-      action: string;
+      action: Skill;
       player: string;
     }[],
     sessionId: string

@@ -40,7 +40,7 @@ export class ResolveActionsLogic {
       const opponent = room.state.players.get(opponentKey);
       const random = attributesCalculations.generateRadintBetween(1, 100);
 
-      const skill: Skill = JSON.parse(ac.action);
+      const skill: Skill = ac.action;
 
       switch (skill.effect) {
         case "DAMAGE": {
