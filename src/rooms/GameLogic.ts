@@ -408,6 +408,17 @@ export class GameLogic {
               resultDamage = opponent.receiveDamage(basedamage);
             }
 
+            if (skill?.factors) {
+              const status = new StatusSchema({
+                damage: 0,
+                factors: skill?.factors || "{}",
+                type: skill.type,
+                duration: skill.duration || 0,
+              });
+
+              player.addStatus(status);
+            }
+
             const username = player.userId.split("@")[0];
 
             const msg = `${username}@${skill.name}@${
