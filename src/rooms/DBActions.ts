@@ -72,13 +72,13 @@ export class DBActions {
         where: { id: player_id },
       });
 
-      console.log("Adding game to players");
+      // console.log("Adding game to players");
       const gameArr = existingPlayer[0].GameHistory;
 
       const index = gameArr.findIndex((e) => e === game_id);
       if (index > -1) {
-        console.log("Game Already on the DB");
-        console.log({ index, gameArr, game_id });
+        // console.log("Game Already on the DB");
+        // console.log({ index, gameArr, game_id });
         return;
       }
       playerRepo.updatePlayer(player_id, {

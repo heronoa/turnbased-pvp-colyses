@@ -19,7 +19,7 @@ interface MatchmakingGroup {
 interface ClientStat {
   client: Client;
   waitingTime: number;
-  options?: any;
+  options?: Partial<ICharacterInitial & { player_db_id: string }>;
   group?: MatchmakingGroup;
   rank: number;
   confirmed?: boolean;
@@ -44,7 +44,7 @@ export class MyLobbyRoom extends Room {
   }
 
   static async onAuth(token: string, req: IncomingMessage): Promise<any> {
-    console.log({ token, req });
+    // console.log({ token, req });
     return await JWT.verify(token, process.env.SECRET);
   }
 
@@ -68,9 +68,13 @@ export class MyLobbyRoom extends Room {
 
     console.log({ player_db_id });
 
-    const index = this.stats.findIndex(
-      (stat) => stat.options.wallet === options.character.name
-    );
+    const index = this.stats.findIndex((stat) => {
+      console.log({
+        stats: stat.options.character.name,
+        character: options.character.name,
+      });
+      return stat.options.character.name === options.character.name;
+    });
 
     console.log({ index });
 
@@ -87,7 +91,7 @@ export class MyLobbyRoom extends Room {
 
     client.send("clients", [undefined]);
 
-    console.log("final");
+    // console.log("final");
   }
 
   createGroup() {

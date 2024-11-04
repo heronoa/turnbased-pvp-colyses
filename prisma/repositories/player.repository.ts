@@ -42,7 +42,7 @@ export class PlayersPrismaORMRepository implements IPlayersRepository {
       data: player,
     });
 
-    console.log({ createResult, player });
+    // console.log({ createResult, player });
     return createResult;
   }
   async createManyPlayer(player: Player[]): Promise<any> {

@@ -348,6 +348,12 @@ export class GameLogic {
 
         player.afkClear();
 
+        const mov = playerAction?.movement;
+        if (mov) {
+          const playerBF = room.state.battleField.get(playerAction.player);
+          playerBF.playerMovement(player, mov);
+        }
+
         switch (skill.effect) {
           case "BUFF": {
             player.specialUsed(skill?.baseCost || 0);
@@ -467,10 +473,10 @@ export class GameLogic {
           }
 
           case undefined: {
-            console.log("ERROR: ", { e: JSON.stringify(playerAction) });
+            console.log("ERROR: ", { e: JSON.stringify(skill) });
           }
           default:
-            console.log("ERROR: ", { e: JSON.stringify(playerAction) });
+            console.log("ERROR: ", { e: JSON.stringify(skill) });
         }
       });
 
@@ -582,7 +588,11 @@ export class GameLogic {
 
     const rAction = bot.randomAction();
 
-    const botAction = new Action(bot.playerName, rAction);
+    const botAction = new Action(
+      bot.playerName,
+      rAction.skill,
+      rAction.movement
+    );
 
     room.state.actions.set(botAction.player, botAction);
     console.log("finished");

@@ -44,38 +44,59 @@ export class BotRoom extends Room<MyRoomState> {
     this.onMessage("chat", (client, message) => {
       this.broadcast("chat", `${client.sessionId}: ${message.data}`);
     });
-    this.onMessage("action", async (client, message: Skill) => {
-      if (this.state.actions.get(client.sessionId)) {
-        return client.send("warn", "you already take a action");
-      }
+    this.onMessage(
+      "action",
+      async (
+        client,
+        message: { skill: Skill; movement?: { x: number; y: number } }
+      ) => {
+        console.log({ message });
+        if (this.state.actions.get(client.sessionId)) {
+          return client.send("warn", "you already take a action");
+        }
 
-      const skill = JSON.stringify(message);
+        const skill = JSON.stringify(message.skill);
 
-      const player = this.state.players.get(client.sessionId);
+        const player = this.state.players.get(client.sessionId);
 
-      if (player.mana < message.baseCost) {
-        return client.send(
-          "warn",
-          `You don't have enough magicka to use ${message.name}`
+        if (player.mana < message.skill.baseCost) {
+          return client.send(
+            "warn",
+            `You don't have enough magicka to use ${message.skill.name}`
+          );
+        }
+
+        const skillCountdown = player.skill_countdown.get(message.skill.id);
+
+        if (skillCountdown) {
+          return client.send(
+            "warn",
+            `You need to wait ${skillCountdown.duration} to use ${message.skill.name} again`
+          );
+        }
+
+        if (message?.movement) {
+          const bf = this.state.battleField.get(client.sessionId);
+          const wantedBFtile =
+            bf.map[message.movement.y].tilesets[message.movement.x];
+
+          if (!wantedBFtile?.enabled) {
+            return client.send("warn", `This tileset is unabled`);
+          }
+        }
+
+        const newAction = new Action(
+          client.sessionId,
+          skill as string,
+          message?.movement
         );
+
+        this.state.actions.set(newAction.player, newAction);
+
+        GameLogic.inputBotAction(this, newAction.player);
+        console.log("Finished");
       }
-
-      const skillCountdown = player.skill_countdown.get(message.id);
-
-      if (skillCountdown) {
-        return client.send(
-          "warn",
-          `You need to wait ${skillCountdown.duration} to use ${message.name} again`
-        );
-      }
-
-      const newAction = new Action(client.sessionId, skill as string);
-
-      this.state.actions.set(newAction.player, newAction);
-
-      GameLogic.inputBotAction(this, newAction.player);
-      console.log("Finished");
-    });
+    );
   }
 
   async onJoin(client: Client, options: ICharacterInitial) {
@@ -94,16 +115,13 @@ export class BotRoom extends Room<MyRoomState> {
     this.state.players.set(client.sessionId, player);
     this.state.players.set(bot.playerName, bot);
 
+    const opponentBF = new BattleField(this.MapX, this.MapY);
     const playerBF = new BattleField(this.MapX, this.MapY);
 
     playerBF.addPlayerInitialToTileSet(player);
-
-    this.state.battleField.set(client.sessionId, playerBF);
-
-    const opponentBF = new BattleField(this.MapX, this.MapY);
-
     opponentBF.addPlayerInitialToTileSet(bot);
 
+    this.state.battleField.set(client.sessionId, playerBF);
     this.state.battleField.set(bot.playerName, opponentBF);
     // this.state.players.set(client.sessionId, player);
 
@@ -131,10 +149,7 @@ export class BotRoom extends Room<MyRoomState> {
         if (this.state.actions.size === 1) {
           const rAction = bot.randomAction();
 
-          const botAction = new Action(bot.playerName, rAction).assign({
-            action: rAction,
-            player: bot.playerName,
-          });
+          const botAction = new Action(bot.playerName, rAction.skill, rAction.movement)
 
           this.state.actions.set(botAction.player, botAction);
         }

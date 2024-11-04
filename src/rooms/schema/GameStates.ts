@@ -3,6 +3,7 @@ import { attributesCalculations } from "../../utils/calculations";
 import {
   ActionSchema,
   BattleFieldSchema,
+  MovementAction,
   PlayerSchema,
   SkillSchema,
   TilesetX,
@@ -132,7 +133,10 @@ export class BotPlayer extends Player {
     const actionChoosed =
       possibleActions[Math.floor(Math.random() * possibleActions.length)];
 
-    const skillChoosed = JSON.stringify(actionChoosed);
+    const skillChoosed = {
+      skill: JSON.stringify(actionChoosed),
+      movement: { x: (Math.random() * 3) >> 0, y: (Math.random() * 4) >> 0 },
+    };
 
     return skillChoosed;
   }
@@ -145,10 +149,15 @@ export class SkillClass extends SkillSchema {
 }
 
 export class Action extends ActionSchema {
-  constructor(playerName: string, action: string) {
+  constructor(
+    playerName: string,
+    action: string,
+    movement?: { x: number; y: number }
+  ) {
     super(playerName);
     this.player = playerName;
     this.action = action;
+    if (movement) this.movement = new MovementAction(movement);
   }
 }
 

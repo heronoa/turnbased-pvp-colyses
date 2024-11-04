@@ -19,7 +19,7 @@ characterRouter.post("/search", async (req: any, res: any) => {
 
 characterRouter.delete("/delete", async (req: any, res: any) => {
   const { characterId } = req.body;
-  console.log({ body: req.body, data: req.data });
+  // console.log({ body: req.body, data: req.data });
 
   try {
     await CharacterController.deleteCharacter(characterId);

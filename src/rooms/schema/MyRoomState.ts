@@ -290,9 +290,15 @@ export class SkillSchema extends Schema {
   @type("number") countdown = 0;
   @type("number") channeling = 0;
 }
+
+export class MovementAction extends Schema {
+  @type("number") x: number;
+  @type("number") y: number;
+}
 export class ActionSchema extends Schema {
   @type("string") action: string;
   @type("string") player: string;
+  @type(MovementAction) movement?: MovementAction;
 }
 export class WinnerSchema extends Schema {
   @type("number") round: number;
@@ -347,6 +353,13 @@ export class BattleFieldSchema extends Schema {
 
   playerMovement(player: Player, newPosition: { x: number; y: number }) {
     if (newPosition) {
+      console.log({
+        init: {
+          y: player.location_y,
+          x: player.location_x,
+        },
+        newPosition,
+      });
       const initialTileset =
         this.map?.[player.location_y]?.tilesets[player.location_x];
 
@@ -355,8 +368,8 @@ export class BattleFieldSchema extends Schema {
 
       const finalTileset = this.map?.[newPosition.y]?.tilesets[newPosition.x];
 
-      initialTileset.enabled = false;
-      initialTileset.playerId = player.userId;
+      finalTileset.enabled = false;
+      finalTileset.playerId = player.userId;
 
       player.changeLocation(newPosition);
     }
