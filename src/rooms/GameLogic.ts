@@ -318,7 +318,10 @@ export class GameLogic {
     const actionArr = Array.from(room.state.actions.values());
 
     ResolveActionsLogic.handleAfkAction(room, actionArr);
-    Array.from(room.state.players.values()).forEach((p) => p.resolveStatus());
+    Array.from(room.state.players.values()).forEach((p) => {
+      p.resolveStatus();
+      p.resolveSkillCountdown();
+    });
     const isHitMap = ResolveActionsLogic.handleCheckHit(room, actionArr);
 
     const actionsMsgArr = Array.from(room.state.actions.values())
@@ -348,11 +351,14 @@ export class GameLogic {
         switch (skill.effect) {
           case "BUFF": {
             player.specialUsed(skill?.baseCost || 0);
+            player.addSkillCountdown(skill);
+
             const username = player.userId.split("@")[0];
             const isHit = isHitMap.get(playerAction.player);
+            let damage = 0;
 
             if (isHit && skill?.baseCost > 0) {
-              const damage = attributesCalculations.calcStatusDamage(
+              damage = attributesCalculations.calcStatusDamage(
                 skill.baseDamage,
                 player.willpower
               );
@@ -371,7 +377,7 @@ export class GameLogic {
 
             console.log({ caster: username, name: skill.name });
 
-            const msg = `${username}@${skill.name}@${
+            const msg = `${username}@${skill.name}@${damage}@${
               isHit || skill?.baseCost < 0 ? "suc" : "miss"
             }@${skill.baseCost}`;
             room.broadcast("action", { msg });
@@ -380,6 +386,7 @@ export class GameLogic {
           }
           case "DAMAGE": {
             player.specialUsed(skill?.baseCost || 0);
+            player.addSkillCountdown(skill);
 
             const isHit = isHitMap.get(playerAction.player);
             let basedamage = 0;
@@ -413,18 +420,19 @@ export class GameLogic {
           }
           case "STATUS": {
             player.specialUsed(skill?.baseCost || 0);
+            player.addSkillCountdown(skill);
+
+            let damage = 0;
 
             const isHit = isHitMap.get(playerAction.player);
 
             if (isHit) {
-              const damage = attributesCalculations.calcStatusDamage(
+              damage = attributesCalculations.calcStatusDamage(
                 skill.baseDamage,
                 player.willpower
               );
 
               // const factors = JSON.stringify(skill.factors);
-
-              console.log({ name: skill.name });
 
               const status = new StatusSchema({
                 factors: skill?.factors || "{}",
@@ -439,9 +447,9 @@ export class GameLogic {
 
             console.log({ caster: username, name: skill.name });
 
-            const msg = `${username}@${skill.name}@${isHit ? "suc" : "miss"}@${
-              skill?.baseCost || 0
-            }`;
+            const msg = `${username}@${skill.name}@${
+              isHit ? "suc" : "miss"
+            }@${damage}@${skill?.baseCost || 0}`;
             room.broadcast("action", { msg });
 
             return { ...playerAction, resultMsg: { msg } };
@@ -520,8 +528,8 @@ export class GameLogic {
         Number(cost) === 0
           ? ""
           : Number(cost) > 0
-          ? ` And uses ${cost} Magicka`
-          : ` And recover ${cost} Magicka`
+          ? ` and uses ${cost} Magicka`
+          : ` and recover ${Math.abs(+cost)} Magicka`
       }`;
     }
     if (opponentMsg) {

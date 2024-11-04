@@ -64,6 +64,9 @@ export class PlayerSchema extends Schema {
 
   addSkillCountdown(skill: Skill) {
     const skillCountdown = new SkillCountdown(skill);
+    if (skill.countdown === 0) {
+      return
+    }
 
     this.skill_countdown.set(skill.id, skillCountdown);
   }

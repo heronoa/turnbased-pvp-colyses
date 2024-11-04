@@ -48,10 +48,21 @@ export class BotRoom extends Room<MyRoomState> {
 
       const skill = JSON.stringify(message);
 
-      if (this.state.players.get(client.sessionId).mana < message.baseCost) {
+      const player = this.state.players.get(client.sessionId)
+
+      if (player.mana < message.baseCost) {
         return client.send(
           "warn",
           `You don't have enough magicka to use ${message.name}`
+        );
+      }
+
+      const skillCountdown =  player.skill_countdown.get(message.id)
+
+      if (skillCountdown) {
+        return client.send(
+          "warn",
+          `You need to wait ${skillCountdown.duration} to use ${message.name} again`
         );
       }
 
