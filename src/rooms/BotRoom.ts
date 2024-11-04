@@ -2,6 +2,7 @@ import { Room, Client } from "@colyseus/core";
 import { BotPlayerSchema, MyRoomState } from "./schema/MyRoomState";
 import {
   Action,
+  BattleField,
   BotPlayer,
   ICharacterInitial,
   Player,
@@ -23,6 +24,8 @@ export class BotRoom extends Room<MyRoomState> {
   refreshInterval: Delayed;
   disposeInterval: Delayed;
   maxAfkSequel = 3;
+  MapX = 3;
+  MapY = 4;
 
   onCreate(options: any) {
     this.setState(new MyRoomState());
@@ -48,7 +51,7 @@ export class BotRoom extends Room<MyRoomState> {
 
       const skill = JSON.stringify(message);
 
-      const player = this.state.players.get(client.sessionId)
+      const player = this.state.players.get(client.sessionId);
 
       if (player.mana < message.baseCost) {
         return client.send(
@@ -57,7 +60,7 @@ export class BotRoom extends Room<MyRoomState> {
         );
       }
 
-      const skillCountdown =  player.skill_countdown.get(message.id)
+      const skillCountdown = player.skill_countdown.get(message.id);
 
       if (skillCountdown) {
         return client.send(
@@ -90,6 +93,18 @@ export class BotRoom extends Room<MyRoomState> {
 
     this.state.players.set(client.sessionId, player);
     this.state.players.set(bot.playerName, bot);
+
+    const playerBF = new BattleField(this.MapX, this.MapY);
+
+    playerBF.addPlayerInitialToTileSet(player);
+
+    this.state.battleField.set(client.sessionId, playerBF);
+
+    const opponentBF = new BattleField(this.MapX, this.MapY);
+
+    opponentBF.addPlayerInitialToTileSet(bot);
+
+    this.state.battleField.set(bot.playerName, opponentBF);
     // this.state.players.set(client.sessionId, player);
 
     this.broadcast(

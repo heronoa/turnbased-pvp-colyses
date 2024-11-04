@@ -2,9 +2,10 @@ import { InitialSkills } from "../../utils/attributes";
 import { attributesCalculations } from "../../utils/calculations";
 import {
   ActionSchema,
-  BotPlayerSchema,
+  BattleFieldSchema,
   PlayerSchema,
   SkillSchema,
+  TilesetX,
   WinnerSchema,
 } from "./MyRoomState";
 
@@ -55,11 +56,28 @@ export interface ICharacterInitial {
     level: number;
     hp: number;
   };
+  initial_pos: {
+    x: number;
+    y: number;
+  };
+}
+
+export class BattleField extends BattleFieldSchema {
+  constructor(x: number, y: number) {
+    super();
+    const newMap = new Array(y).fill(0);
+
+    const filledMap = newMap.map((ts) => new TilesetX(x));
+
+    this.map = filledMap;
+  }
 }
 
 export class Player extends PlayerSchema {
   constructor(playerName: string, attributes: ICharacterInitial) {
     super(playerName, attributes);
+    this.location_x = attributes?.initial_pos?.x || 0;
+    this.location_y = attributes?.initial_pos?.y || 0;
     this.status = [];
     this.player_db_id = attributes.player_db_id;
     this.userId = attributes.userId;

@@ -1,6 +1,6 @@
 import { Schema, MapSchema, type } from "@colyseus/schema";
 import { attributesCalculations } from "../../utils/calculations";
-import { ICharacterInitial, Skill } from "./GameStates";
+import { ICharacterInitial, Player, Skill } from "./GameStates";
 
 export class StatusSchema extends Schema {
   @type("number") damage?: number;
@@ -28,6 +28,9 @@ export class PlayerSchema extends Schema {
   @type({ array: StatusSchema }) status: StatusSchema[] = [];
   @type({ map: SkillCountdownSchema }) skill_countdown =
     new MapSchema<SkillCountdownSchema>();
+
+  @type("number") location_x: number;
+  @type("number") location_y: number;
 
   @type("boolean") connected: boolean = true;
   @type("number") hp: number;
@@ -62,10 +65,15 @@ export class PlayerSchema extends Schema {
   @type("number") manaRegen: number;
   @type("number") specialDamage: number;
 
+  changeLocation(newPosition: { x: number; y: number }) {
+    this.location_x = newPosition.x;
+    this.location_y = newPosition.y;
+  }
+
   addSkillCountdown(skill: Skill) {
     const skillCountdown = new SkillCountdown(skill);
     if (skill.countdown === 0) {
-      return
+      return;
     }
 
     this.skill_countdown.set(skill.id, skillCountdown);
@@ -291,7 +299,82 @@ export class WinnerSchema extends Schema {
   @type("string") winner: string;
 }
 
+export class BattleFieldTileSet extends Schema {
+  @type("boolean") enabled: boolean = true;
+  @type("boolean") trap: boolean = false;
+  @type("string") playerId: string = "";
+}
+
+export class Tileset extends BattleFieldTileSet {
+  constructor() {
+    super();
+  }
+}
+export class BattleFieldYSchema extends Schema {
+  @type({ array: BattleFieldTileSet }) tilesets: BattleFieldTileSet[];
+}
+
+export class TilesetX extends BattleFieldYSchema {
+  constructor(MapYSize: number) {
+    super();
+    const newMap = new Array(MapYSize).fill(0);
+
+    const map = newMap.map((ts) => new Tileset());
+
+    this.tilesets = map;
+  }
+}
+
+export class BattleFieldSchema extends Schema {
+  @type({ array: BattleFieldYSchema }) map: BattleFieldYSchema[] = new Array(
+    4
+  ).fill(new TilesetX(3));
+
+  addPlayerInitialToTileSet(player: Player) {
+    const initialTileset =
+      this.map?.[player.location_y as number]?.tilesets[
+        player.location_x as number
+      ];
+
+    console.log({
+      tileSet: JSON.stringify(initialTileset),
+      location: { x: player.location_x, y: player.location_y },
+    });
+
+    initialTileset.enabled = false;
+    initialTileset.playerId = player.userId;
+  }
+
+  playerMovement(player: Player, newPosition: { x: number; y: number }) {
+    if (newPosition) {
+      const initialTileset =
+        this.map?.[player.location_y]?.tilesets[player.location_x];
+
+      initialTileset.enabled = true;
+      initialTileset.playerId = "";
+
+      const finalTileset = this.map?.[newPosition.y]?.tilesets[newPosition.x];
+
+      initialTileset.enabled = false;
+      initialTileset.playerId = player.userId;
+
+      player.changeLocation(newPosition);
+    }
+  }
+}
+
+// const battleField = [
+//   {tileset: ["tile1","tile2","tile3"]},
+//   {tileset: ["tile4","tile5","tile6"]},
+//   {tileset: ["tile7","tile8","tile9"]},
+//   {tileset: ["tile10","tile11","tile12"]}
+// ]
+
+// const tile1 = map[y][x]
+
 export class MyRoomState extends Schema {
+  @type({ map: BattleFieldSchema }) battleField =
+    new MapSchema<BattleFieldSchema>();
   @type("number") currentTurn: number = 1;
   @type("number") currentRound: number = 1;
   @type("number") countdown: number = 25;
