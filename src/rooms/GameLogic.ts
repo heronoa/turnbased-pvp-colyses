@@ -582,7 +582,7 @@ export class GameLogic {
 
     const botAction = new Action(
       bot.playerName,
-      rAction.skill,
+      rAction.skill as unknown as Skill,
       rAction.movement
     );
 

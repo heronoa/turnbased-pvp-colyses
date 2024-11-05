@@ -294,14 +294,15 @@ export class SkillSchema extends Schema {
   @type("number") channeling = 0;
 }
 
-export class MovementAction extends Schema {
+export class MapAction extends Schema {
   @type("number") x: number;
   @type("number") y: number;
 }
 export class ActionSchema extends Schema {
   @type(SkillSchema) action: SkillClass;
   @type("string") player: string;
-  @type(MovementAction) movement?: MovementAction;
+  @type(MapAction) movement?: MapAction;
+  @type(MapAction) target?: MapAction;
 }
 export class WinnerSchema extends Schema {
   @type("number") round: number;

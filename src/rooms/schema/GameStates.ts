@@ -3,7 +3,7 @@ import { attributesCalculations } from "../../utils/calculations";
 import {
   ActionSchema,
   BattleFieldSchema,
-  MovementAction,
+  MapAction,
   PlayerSchema,
   SkillSchema,
   TilesetX,
@@ -32,6 +32,10 @@ export interface Skill {
   baseCost: number;
   countdown: number;
   factors?: string;
+  areaX?: number[]; // [1,1]
+  areaY?: number[]; //  [1,1]
+  targetable?: boolean;
+  combineCoords?: "ALL" | "ONLY_COMBINE" | "NO_COMBINE";
   // {
   //   strength?: number;
   //   dexterity?: number;
@@ -127,8 +131,8 @@ export class BotPlayer extends Player {
   }
   randomAction() {
     const possibleActions = InitialSkills.warrior.filter(
-      (skill: Skill) => skill.baseCost <= this.mana
-    ) as Skill[];
+      (skill) => skill.baseCost <= this.mana
+    );
 
     const actionChoosed =
       possibleActions[Math.floor(Math.random() * possibleActions.length)];
@@ -152,12 +156,14 @@ export class Action extends ActionSchema {
   constructor(
     playerName: string,
     action: Skill,
-    movement?: { x: number; y: number }
+    movement?: { x: number; y: number },
+    target?: { x: number; y: number }
   ) {
     super(playerName);
     this.player = playerName;
     this.action = new SkillClass(action);
-    if (movement) this.movement = new MovementAction(movement);
+    if (movement) this.movement = new MapAction(movement);
+    if (target) this.target = new MapAction(target);
   }
 }
 

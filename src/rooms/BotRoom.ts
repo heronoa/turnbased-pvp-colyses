@@ -48,7 +48,11 @@ export class BotRoom extends Room<MyRoomState> {
       "action",
       async (
         client,
-        message: { skill: Skill; movement?: { x: number; y: number } }
+        message: {
+          skill: Skill;
+          movement?: { x: number; y: number };
+          target?: { x: number; y: number };
+        }
       ) => {
         console.log({ message });
         if (this.state.actions.get(client.sessionId)) {
@@ -88,10 +92,11 @@ export class BotRoom extends Room<MyRoomState> {
         const newAction = new Action(
           client.sessionId,
           skill,
-          message?.movement
+          message?.movement,
+          message?.target
         );
 
-        this.state.actions.set(newAction.player, newAction);
+        this.state.actions.set(newAction.player, newAction );
 
         GameLogic.inputBotAction(this, newAction.player);
         console.log("Finished");
@@ -151,7 +156,7 @@ export class BotRoom extends Room<MyRoomState> {
 
           const botAction = new Action(
             bot.playerName,
-            rAction.skill,
+            rAction.skill as unknown as Skill,
             rAction.movement
           );
 

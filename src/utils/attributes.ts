@@ -93,7 +93,7 @@ const comumInitialSkills: Omit<Skill, "id">[] = [
   },
 ];
 
-export const InitialSkills: any = {
+export const InitialSkills: { [key: string]: Partial<Skill>[] } = {
   warrior: [
     ...comumInitialSkills,
     {
@@ -102,6 +102,17 @@ export const InitialSkills: any = {
       description:
         "Se poe em modo de defesa aumentando sua defesa por um 3 turnos",
 
+      baseCost: 5,
+      countdown: 0,
+      factors: JSON.stringify({ resistence: 3 }),
+    },
+    {
+      name: "Slash",
+      effect: "Damage",
+      description: "Corte horizontal que acerta 3 casas na vertical",
+      targetable: true,
+
+      areaX: [1, 1],
       baseCost: 5,
       countdown: 0,
       factors: JSON.stringify({ resistence: 3 }),
@@ -123,8 +134,26 @@ export const InitialSkills: any = {
       name: "Fireball",
       effect: "DAMAGE",
       description: "Lança uma bola de fogo no inimigo",
-
+      targetable: true,
+      areaX: [1, 1],
+      areaY: [1, 1],
+      combineCoords: "NO_COMBINE",
       type: "FIRE",
+      baseDamage: 12,
+      baseCost: 8,
+      countdown: 2,
+      factors: JSON.stringify({ willpower: 2 }),
+    },
+    {
+      name: "Thunder",
+      effect: "DAMAGE",
+      description: "Lança uma bola de fogo no inimigo",
+
+      areaX: [1, 1],
+      areaY: [1, 1],
+      targetable: true,
+      combineCoords: "ONLY_COMBINE",
+      type: "AIR",
       baseDamage: 12,
       baseCost: 8,
       countdown: 2,

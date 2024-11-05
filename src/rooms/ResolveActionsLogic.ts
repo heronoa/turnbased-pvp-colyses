@@ -32,7 +32,7 @@ export class ResolveActionsLogic {
         console.log("attacker:", JSON.stringify(attacker));
         console.log("action:", JSON.stringify(ac));
 
-        return
+        return;
       }
       const opponentKey = Array.from(room.state.players.keys()).find(
         (k: string) => k !== ac.player
@@ -41,6 +41,13 @@ export class ResolveActionsLogic {
       const random = attributesCalculations.generateRadintBetween(1, 100);
 
       const skill: Skill = ac.action;
+
+      if (skill?.targetable) {
+        if (!ac?.target) {
+          return isHitMap.set(attacker.playerName, false);
+        }
+
+      }
 
       switch (skill.effect) {
         case "DAMAGE": {

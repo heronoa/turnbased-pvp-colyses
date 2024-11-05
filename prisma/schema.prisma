@@ -43,20 +43,30 @@ model CharacterAttribute {
 }
 
 model Skill {
-    id          String    @id @default(auto()) @map("_id") @db.ObjectId
-    name        String
-    duration    Int?
-    effect      Effect
-    baseDamage  Int?
-    type        SkillType?
-    baseCost    Int
-    countdown   Int
-    channeling  Int?
-    factors     String?
-    description String?
+    id            String       @id @default(auto()) @map("_id") @db.ObjectId
+    name          String
+    duration      Int?
+    effect        Effect
+    baseDamage    Int?
+    type          SkillType?
+    baseCost      Int
+    countdown     Int
+    channeling    Int?
+    factors       String?
+    description   String?
+    areaX         Int[] // [1,1]
+    areaY         Int[] //  [1,1]
+    targetable    Boolean?
+    combineCoords Combine_Type @default(ALL)
 
     Character   Character? @relation(fields: [characterId], references: [id])
     characterId String?    @db.ObjectId
+}
+
+enum Combine_Type {
+    ONLY_COMBINE
+    NO_COMBINE
+    ALL
 }
 
 enum Effect {
