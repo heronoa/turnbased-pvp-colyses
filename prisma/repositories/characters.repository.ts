@@ -1,3 +1,8 @@
+import { Skill } from "../../src/rooms/schema/GameStates";
+import {
+  InitialAttributesByClass,
+  InitialSkills,
+} from "../../src/utils/attributes";
 import { Character } from "./entities/character.entity";
 import { prismaClient } from "./prismaClient";
 
@@ -88,5 +93,36 @@ export class CharactersPrismaORMRepository implements ICharactersRepository {
     } catch (err) {
       console.log({ err });
     }
+  }
+
+  async createNewCharacter({
+    name,
+    id,
+    heroClass,
+  }: Partial<Character>): Promise<any> {
+    const newCharacter = await this.prismaClient.character.create({
+      data: {
+        level: 1,
+        exp: 0,
+        levelupExp: 100,
+        userId: id,
+        name,
+        heroClass: heroClass,
+        CharacterAttribute: {
+          create: {
+            ...InitialAttributesByClass[
+              heroClass as "warrior" | "mage" | "scout"
+            ],
+          },
+        },
+        skill: {
+          createMany: {
+            data: InitialSkills[heroClass] as Skill[],
+          },
+        },
+      },
+    });
+
+    return newCharacter;
   }
 }

@@ -1,6 +1,5 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { UsersPrismaORMRepository } from "../../prisma/repositories/user.repository";
-import bcrypt from "bcrypt";
+import { Request, Response } from "express";
+import { AuthService } from "../services/AuthService";
 
 interface ICredentials {
   email: string;
@@ -9,76 +8,60 @@ interface ICredentials {
 }
 
 export class AuthController {
-  static async me(token: string) {
+  constructor(private authService = new AuthService()) {
+    console.log("AuthController contructor");
+  }
+
+  async me(req: Request, res: Response) {
     try {
-      const payload = jwt.verify(token, process.env.SECRET) as JwtPayload;
-
-      const userRepository = new UsersPrismaORMRepository();
-
-      if (payload?.id) {
-        const userExists = await userRepository.findUserById(payload.id);
-        return userExists;
-      } else {
-        console.log("User not found");
-        return { msg: "User not found" };
+      if (!req.headers.authorization) {
+        res.status(422).json({ msg: "missing parameters" });
       }
+      const token = req?.headers?.authorization?.split(" ")[1];
+
+      const me = await this.authService.me(token);
+      res.status(200).json({ user: me });
     } catch (err) {
-      console.log({ err });
+      res.status(500).json({ user: undefined, msg: "Login error" });
     }
   }
 
-  static async login({ email, password }: ICredentials) {
-    const userRepository = new UsersPrismaORMRepository();
+  async login(req: Request, res: Response) {
+    try {
+      const { email = "", password = "" } = req.body;
 
-    const userExists = await userRepository.findUsersByEmailAndPassword(email);
-
-    let cryptResult = false;
-    if (userExists) {
-      cryptResult = await bcrypt.compare(password, userExists.password);
-
-      if (cryptResult) {
-        const id = userExists.id;
-        const token = jwt.sign({ id }, process.env.SECRET, {
-          expiresIn: 300, // expires in 5min
-        });
-
-        return {
-          token,
-          user: {
-            email: userExists.email,
-            username: userExists.username,
-            character: userExists?.character || [],
-          },
-        };
-      } else {
-        return { msg: "Password incorrect" };
+      if (!email.trim() || !password.trim()) {
+        res.status(422).json({ error: "Missing Parameters" });
       }
-    } else {
-      return { msg: "user not found" };
+
+      const data = await this.authService.login({
+        email: email.toLowerCase(),
+        password,
+      });
+
+      res.status(200).json(data);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
     }
   }
 
-  static async signup({ email, username, password }: ICredentials) {
-    const userRepository = new UsersPrismaORMRepository();
+  async signup(req: Request, res: Response) {
+    try {
+      const { email = "", password = "", username = "" } = req.body;
 
-    const saltRounds = 10;
-    let createUser;
-
-    bcrypt.hash(password, saltRounds, async function (err, hash) {
-      if (err) {
-        return err.message;
+      if (!email.trim() || !password.trim() || !username.trim()) {
+        res.status(422).json({ error: "Missing Parameters" });
       }
-      createUser = await userRepository.createUser({
+
+      const userCreationMsg = await this.authService.signup({
         email,
-        password: hash,
+        password,
         username,
       });
-    });
 
-    if (createUser) {
-      return "User created sucessfully";
+      res.status(200).json({ msg: userCreationMsg });
+    } catch (err: any) {
+      res.status(400).json({ error: err.message });
     }
-
-    return "User creation failed";
   }
 }

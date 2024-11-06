@@ -69,8 +69,6 @@ export class PlayerSchema extends Schema {
       return;
     }
 
-    console.log({ skill });
-
     this.skill_countdown.set(skill?.id || skill?.name, skillCountdown);
   }
 
@@ -108,66 +106,23 @@ export class PlayerSchema extends Schema {
     willpower: number;
     intelligence: number;
   }) {
-    console.log("debuffing", {
-      player1: JSON.stringify({
-        strength: this.strength,
-        dexterity: this.dexterity,
-        resistence: this.resistence,
-        vitality: this.vitality,
-        willpower: this.willpower,
-        intelligence: this.intelligence,
-      }),
-    });
     this.strength -= this.base_strength * (factors?.strength || 0);
     this.dexterity -= this.base_dexterity * (factors?.dexterity || 0);
     this.resistence -= this.base_resistence * (factors?.resistence || 0);
     this.vitality -= this.base_vitality * (factors?.vitality || 0);
     this.willpower -= this.base_willpower * (factors?.willpower || 0);
     this.intelligence -= this.base_intelligence * (factors?.intelligence || 0);
-    console.log("debuffing", {
-      player2: JSON.stringify({
-        strength: this.strength,
-        dexterity: this.dexterity,
-        resistence: this.resistence,
-        vitality: this.vitality,
-        willpower: this.willpower,
-        intelligence: this.intelligence,
-      }),
-    });
   }
 
   addStatus(status: StatusSchema) {
-    console.log({ status });
-
     this.status.push(status);
     const factors = JSON.parse(status.factors);
 
-    console.log("buffing", {
-      player1: JSON.stringify({
-        strength: this.strength,
-        dexterity: this.dexterity,
-        resistence: this.resistence,
-        vitality: this.vitality,
-        willpower: this.willpower,
-        intelligence: this.intelligence,
-      }),
-    });
     this.resolveFactors(factors);
-    console.log("buffing", {
-      player2: JSON.stringify({
-        strength: this.strength,
-        dexterity: this.dexterity,
-        resistence: this.resistence,
-        vitality: this.vitality,
-        willpower: this.willpower,
-        intelligence: this.intelligence,
-      }),
-    });
   }
 
   resolveStatus() {
     this.status.forEach((stats: StatusSchema, index) => {
-      console.log({ stats });
       this.receiveDamage(stats?.damage || 0);
       stats.duration--;
 

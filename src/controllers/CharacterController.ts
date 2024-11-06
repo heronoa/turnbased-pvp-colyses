@@ -1,115 +1,60 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
 import { CharactersPrismaORMRepository } from "../../prisma/repositories/characters.repository";
-
-import bcrypt from "bcrypt";
 import { InitialAttributesByClass, InitialSkills } from "../utils/attributes";
 import { prismaClient } from "../../prisma/repositories/prismaClient";
 import { Skill } from "../rooms/schema/GameStates";
-
-interface ICharacters {
-  heroClass: "warrior" | "scout" | "mage";
-  name: string;
-  id: string;
-}
+import { CharacterService } from "../services/CharacterService";
 
 export class CharacterController {
-  static async createCharacter({ heroClass, name, id }: ICharacters) {
+  constructor(private characterService = new CharacterService()) {
+    console.log("CharacterController contructor");
+  }
+
+  async getCharacter(req: any, res: any) {
+    const { characterId } = req.body;
+
     try {
-      // Verifica se o usuário já possui algum Character associado
-      const userWithCharacters = await prismaClient.user.findUnique({
-        where: { id },
-        include: { character: true },
+      const character = await this.characterService.getCharacter(characterId);
+
+      res.status(200).json({ character });
+    } catch (err) {
+      console.log({ err });
+      res.status(500).json({ msg: "error on find character" });
+    }
+  }
+
+  async deleteCharacter(req: any, res: any) {
+    const { characterId } = req.body;
+
+    try {
+      await this.characterService.deleteCharacter(characterId);
+
+      res.status(200).json({ msg: "Character deleted sucessfully" });
+    } catch (err) {
+      console.log({ err });
+      res.status(500).json({ msg: "error on find character" });
+    }
+  }
+
+  async createCharacter(req: any, res: any) {
+    const { name = undefined, classHero = undefined } = req.body;
+
+    const userData = req?.userData as any;
+
+    if (name && classHero) {
+      const msg = await this.characterService.createCharacter({
+        id: userData.id,
+        heroClass: classHero,
+        name,
       });
 
-      if (!userWithCharacters) {
-        console.log("Usuário não encontrado.");
-        return;
-      }
-
-      // Se o usuário não tiver nenhum Character, cria um novo Character e associa ao User
-      if (userWithCharacters.character.length === 0) {
-        const newCharacter = await prismaClient.character.create({
-          data: {
-            level: 1,
-            exp: 0,
-            levelupExp: 100,
-            userId: id,
-            name,
-            heroClass: heroClass,
-            CharacterAttribute: {
-              create: {
-                ...InitialAttributesByClass[heroClass],
-              },
-            },
-            skill: {
-              createMany: {
-                data: InitialSkills[heroClass] as Skill[],
-              },
-            },
-          },
-        });
-
-        console.log(
-          "Novo personagem criado e associado ao usuário:",
-          newCharacter
-        );
-        return "Character created sucessfully";
+      if (msg.indexOf("sucess") !== -1) {
+        res.status(200).json({ msg });
       } else {
-        // Se o usuário já tiver personagens, adiciona um novo ao array
-        const additionalCharacter = await prismaClient.character.create({
-          data: {
-            level: 1,
-            exp: 0,
-            levelupExp: 100,
-            userId: id,
-            name,
-            heroClass: heroClass,
-            CharacterAttribute: {
-              create: {
-                ...InitialAttributesByClass[heroClass],
-              },
-            },
-            skill: {
-              createMany: {
-                data: InitialSkills[heroClass],
-              },
-            },
-          },
-        });
-
-        console.log(
-          "Personagem adicional adicionado ao usuário:",
-          additionalCharacter
-        );
-        return "Character created sucessfully";
+        res.status(500).json({ msg });
       }
-    } catch (error) {
-      console.error("Erro ao adicionar personagem:", error);
-      return "Character creation failed";
+      return;
     }
-  }
 
-  static async getCharacter(characterId: string) {
-    try {
-      const characterRepo = new CharactersPrismaORMRepository();
-
-      const character = await characterRepo.findCharactersById(characterId);
-
-      return character;
-    } catch (err) {
-      console.log({ err });
-    }
-  }
-
-  static async deleteCharacter(characterId: string) {
-    try {
-      const characterRepo = new CharactersPrismaORMRepository();
-
-      const character = await characterRepo.deleteCharacter(characterId);
-
-      return character;
-    } catch (err) {
-      console.log({ err });
-    }
+    res.status(500).json({ msg: "Missing Parameters" });
   }
 }

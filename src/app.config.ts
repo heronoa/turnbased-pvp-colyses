@@ -1,7 +1,8 @@
+import cors from "cors";
+import express from "express";
 import config from "@colyseus/tools";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
-import cors from "cors";
 
 /**
  * Import your Room files
@@ -15,9 +16,8 @@ import { ICharacterInitial } from "./rooms/schema/GameStates";
 import { Room } from "colyseus";
 import { MyRoomState } from "./rooms/schema/MyRoomState";
 import { AuthController } from "./controllers/AuthController";
-import { authRouter } from "./routes/auth";
-import { characterRouter } from "./routes/character";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import router from "./routes";
 
 export default config({
   initializeGameServer: (gameServer) => {
@@ -85,9 +85,22 @@ export default config({
      * Read more: https://expressjs.com/en/starter/basic-routing.html
      */
 
-    app.use(cors())
+    app.use(
+      cors({
+        origin: "*",
+      })
+    );
+
+    app.use(
+      express.urlencoded({
+        extended: true,
+      })
+    );
+
+    app.use(express.json());
 
     app.get("/hello_world", (req, res) => {
+      // Health Check
       res.send("It's time to kick ass and chew bubblegum!");
     });
 
@@ -106,10 +119,7 @@ export default config({
      */
     app.use("/colyseus", monitor());
 
-    app.use("/api/auth", authRouter);
-
-    app.use(authMiddleware);
-    app.use("/api/character", characterRouter);
+    app.use("/api/v1", router);
   },
 
   beforeListen: () => {
