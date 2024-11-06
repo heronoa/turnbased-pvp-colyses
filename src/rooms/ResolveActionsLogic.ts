@@ -60,7 +60,7 @@ export class ResolveActionsLogic {
                 opponent?.dexterity || 0
               );
 
-          console.log({ dodgeOdd, hitOdd });
+          // console.log({ dodgeOdd, hitOdd });
           isHitMap.set(
             attacker.playerName,
             random > dodgeOdd && random < hitOdd
@@ -71,7 +71,7 @@ export class ResolveActionsLogic {
             attacker?.willpower || 0
           );
 
-          console.log({ hitOdd });
+          // console.log({ hitOdd });
 
           isHitMap.set(attacker.playerName, random < hitOdd);
         }
@@ -84,7 +84,7 @@ export class ResolveActionsLogic {
             opponent?.willpower || 0
           );
 
-          console.log({ dodgeOdd, hitOdd });
+          // console.log({ dodgeOdd, hitOdd });
 
           isHitMap.set(
             attacker.playerName,

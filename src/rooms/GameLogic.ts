@@ -375,11 +375,11 @@ export class GameLogic {
               player.addStatus(status);
             }
 
-            console.log({ caster: username, name: skill.name });
+            // console.log({ caster: username, name: skill.name });
 
-            const msg = `${username}@${skill.name}@${damage}@${
+            const msg = `${username}@${skill.name}@${
               isHit || skill?.baseCost < 0 ? "suc" : "miss"
-            }@${skill.baseCost}`;
+            }@${damage}@${skill.baseCost}`;
             room.broadcast("action", { msg });
 
             return { ...playerAction, resultMsg: { msg } };
@@ -425,7 +425,7 @@ export class GameLogic {
               isHit ? "suc" : "miss"
             }@${resultDamage}@${skill?.baseCost || 0}@${skill.type}`;
             room.broadcast("action", { msg });
-            console.log({ caster: username, name: skill.name });
+            // console.log({ caster: username, name: skill.name });
 
             return { ...playerAction, resultMsg: { msg } };
           }
@@ -456,7 +456,7 @@ export class GameLogic {
 
             const username = player.userId.split("@")[0];
 
-            console.log({ caster: username, name: skill.name });
+            // console.log({ caster: username, name: skill.name });
 
             const msg = `${username}@${skill.name}@${
               isHit ? "suc" : "miss"
@@ -564,7 +564,7 @@ export class GameLogic {
           ? ""
           : Number(cost) > 0
           ? ` And uses ${cost} Magicka`
-          : ` And recover ${cost} Magicka`
+          : ` And recover ${Math.abs(+cost)} Magicka`
       }`;
     }
     return {

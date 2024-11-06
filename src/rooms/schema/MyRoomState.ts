@@ -17,7 +17,7 @@ export class SkillCountdownSchema extends Schema {
 export class SkillCountdown extends SkillCountdownSchema {
   constructor(skill: Skill) {
     super();
-    this.id = skill.id;
+    this.id = skill?.id || skill.name;
     this.duration = skill.countdown;
   }
 }
@@ -65,10 +65,12 @@ export class PlayerSchema extends Schema {
   addSkillCountdown(skill: Skill) {
     const skillCountdown = new SkillCountdown(skill);
     if (skill.countdown === 0) {
-      return
+      return;
     }
 
-    this.skill_countdown.set(skill.id, skillCountdown);
+    console.log({ skill });
+
+    this.skill_countdown.set(skill?.id || skill?.name, skillCountdown);
   }
 
   resolveSkillCountdown() {
@@ -76,7 +78,7 @@ export class PlayerSchema extends Schema {
       cd.duration--;
 
       if (cd.duration <= 0) {
-        this.skill_countdown.delete(cd.id);
+        this.skill_countdown.delete(cd?.id);
       }
     });
   }

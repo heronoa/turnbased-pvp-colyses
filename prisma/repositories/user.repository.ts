@@ -64,7 +64,7 @@ export class UsersPrismaORMRepository implements IUsersRepository {
       data: { ...user },
     });
 
-    console.log({ createResult, user });
+    // console.log({ createResult, user });
     return createResult;
   }
   async createManyUser(user: User[]): Promise<any> {

@@ -15,14 +15,14 @@ export const authMiddleware = async (
   try {
     const payload = jwt.verify(token, process.env.SECRET) as JwtPayload;
 
-    console.log("JWT PAYLOAD", { payload });
+    // console.log("JWT PAYLOAD", { payload });
 
     const userRepository = new UsersPrismaORMRepository();
 
     if (payload?.id) {
       const userExists = await userRepository.findUserById(payload.id);
       (req as any).userData = userExists;
-      console.log("middleware", req.body);
+      // console.log("middleware", req.body);
       next();
       return;
     } else {

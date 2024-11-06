@@ -108,7 +108,7 @@ export class BotPlayer extends Player {
   }
   randomAction() {
     const possibleActions = InitialSkills.warrior.filter(
-      (skill: Skill) => skill.baseCost <= this.mana
+      (skill: Skill) => skill.baseCost <= this.mana  && !this.skill_countdown.get(skill.name)
     ) as Skill[];
 
     const actionChoosed =

@@ -39,7 +39,7 @@ characterRouter.post("/create", async (req: any, res: any) => {
   const userData = req?.userData as any;
 
   if (name && classHero) {
-    console.log({ userData, name, classHero });
+    // console.log({ userData, name, classHero });
 
     const msg = await CharacterController.createCharacter({
       id: userData.id,

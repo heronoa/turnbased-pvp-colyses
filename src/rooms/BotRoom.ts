@@ -15,8 +15,8 @@ import { prismaClient } from "../../prisma/repositories/prismaClient";
 
 export class BotRoom extends Room<MyRoomState> {
   turnTimer = 25;
-  maxRounds = 3;
-  maxTurns = 10;
+  maxRounds = 1;
+  maxTurns = 30;
   round = 1;
   turn = 1;
   maxClients = 1;

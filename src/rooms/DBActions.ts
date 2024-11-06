@@ -78,7 +78,7 @@ export class DBActions {
       const index = gameArr.findIndex((e) => e === game_id);
       if (index > -1) {
         console.log("Game Already on the DB");
-        console.log({ index, gameArr, game_id });
+        // console.log({ index, gameArr, game_id });
         return;
       }
       playerRepo.updatePlayer(player_id, {
