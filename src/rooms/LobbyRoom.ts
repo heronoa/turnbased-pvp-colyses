@@ -44,8 +44,7 @@ export class MyLobbyRoom extends Room {
   }
 
   static async onAuth(token: string, req: IncomingMessage): Promise<any> {
-    console.log({ token, req });
-    return await JWT.verify(token, process.env.SECRET);
+    return JWT.verify(token, process.env.SECRET);
   }
 
   async onJoin(client: Client, options: ICharacterInitial) {
