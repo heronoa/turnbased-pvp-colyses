@@ -4,6 +4,7 @@ export const MockedJoinOptions: ICharacterInitial = {
   userId: "Bot",
   player_db_id: "-1",
   character: {
+    heroClass: "warrior",
     magicka: 2,
     dexterity: 5,
     intelligence: 5,

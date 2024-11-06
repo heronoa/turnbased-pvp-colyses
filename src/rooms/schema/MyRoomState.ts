@@ -33,6 +33,7 @@ export class PlayerSchema extends Schema {
   @type("number") hp: number;
   @type("number") max_hp: number;
   @type("string") playerName: string;
+  @type("string") heroClass: string;
   @type("number") afkSequel: number = 0;
   @type("number") baseDamage: number;
   @type("number") damage: number;

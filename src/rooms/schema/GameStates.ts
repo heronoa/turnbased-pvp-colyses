@@ -44,6 +44,7 @@ export interface ICharacterInitial {
   player_db_id: string;
   userId: string;
   character: {
+    heroClass: string;
     name: string;
     magicka: number;
     dexterity: number;
@@ -63,6 +64,7 @@ export class Player extends PlayerSchema {
     this.status = [];
     this.player_db_id = attributes.player_db_id;
     this.userId = attributes.userId;
+    this.heroClass = attributes.character.heroClass;
     this.playerName = playerName;
     this.maxMana = attributesCalculations.calcMaxMana(
       attributes.character.intelligence,
@@ -108,7 +110,8 @@ export class BotPlayer extends Player {
   }
   randomAction() {
     const possibleActions = InitialSkills.warrior.filter(
-      (skill: Skill) => skill.baseCost <= this.mana  && !this.skill_countdown.get(skill.name)
+      (skill: Skill) =>
+        skill.baseCost <= this.mana && !this.skill_countdown.get(skill.name)
     ) as Skill[];
 
     const actionChoosed =
