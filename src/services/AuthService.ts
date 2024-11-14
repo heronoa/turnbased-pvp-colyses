@@ -53,7 +53,8 @@ export class AuthService {
           },
         };
       } else {
-        return { msg: "Password incorrect" };
+        throw new Error("User or Password incorrect");
+        // return { msg: "Password incorrect" };
       }
     } else {
       return { msg: "user not found" };
@@ -79,6 +80,6 @@ export class AuthService {
       return "User created sucessfully";
     }
 
-    return "User creation failed";
+    throw new Error("User creation failed");
   }
 }

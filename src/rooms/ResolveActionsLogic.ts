@@ -28,11 +28,11 @@ export class ResolveActionsLogic {
     actionArr.forEach((ac) => {
       const attacker = room.state.players.get(ac.player);
 
-      if (attacker.playerName === undefined) {
+      if (attacker?.playerName === undefined) {
         console.log("attacker:", JSON.stringify(attacker));
         console.log("action:", JSON.stringify(ac));
 
-        return
+        return;
       }
       const opponentKey = Array.from(room.state.players.keys()).find(
         (k: string) => k !== ac.player
@@ -60,7 +60,7 @@ export class ResolveActionsLogic {
                 opponent?.dexterity || 0
               );
 
-          // console.log({ dodgeOdd, hitOdd });
+          console.log({ dodgeOdd, hitOdd, random });
           isHitMap.set(
             attacker.playerName,
             random > dodgeOdd && random < hitOdd
