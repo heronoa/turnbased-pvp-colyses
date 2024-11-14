@@ -36,7 +36,6 @@ export class MyRoom extends Room<MyRoomState> {
     });
 
     this.onMessage("action", (client, message: Skill) => {
-      console.log({ message });
       if (this.state.actions.get(client.sessionId)) {
         return client.send("warn", "you already take a action");
       }
