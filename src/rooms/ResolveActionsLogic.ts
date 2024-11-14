@@ -29,8 +29,6 @@ export class ResolveActionsLogic {
       const attacker = room.state.players.get(ac.player);
 
       if (attacker?.playerName === undefined) {
-        console.log("attacker:", JSON.stringify(attacker));
-        console.log("action:", JSON.stringify(ac));
 
         return;
       }
@@ -60,20 +58,18 @@ export class ResolveActionsLogic {
                 opponent?.dexterity || 0
               );
 
-          console.log({ dodgeOdd, hitOdd, random });
-          isHitMap.set(
-            attacker.playerName,
-            random > dodgeOdd && random < hitOdd
-          );
+          const result = random > dodgeOdd && random < hitOdd;
+
+          isHitMap.set(attacker.playerName, result);
+          break;
         }
         case "BUFF": {
           const hitOdd = attributesCalculations.calcBuffHitOdd(
             attacker?.willpower || 0
           );
 
-          // console.log({ hitOdd });
-
           isHitMap.set(attacker.playerName, random < hitOdd);
+          break;
         }
         case "STATUS": {
           const hitOdd = attributesCalculations.calcStatusHitOdd(
@@ -84,12 +80,11 @@ export class ResolveActionsLogic {
             opponent?.willpower || 0
           );
 
-          // console.log({ dodgeOdd, hitOdd });
-
           isHitMap.set(
             attacker.playerName,
             random > dodgeOdd && random < hitOdd
           );
+          break;
         }
       }
     });

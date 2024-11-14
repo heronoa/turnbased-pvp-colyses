@@ -425,7 +425,6 @@ export class GameLogic {
               isHit ? "suc" : "miss"
             }@${resultDamage}@${skill?.baseCost || 0}@${skill.type}`;
             room.broadcast("action", { msg });
-            // console.log({ caster: username, name: skill.name });
 
             return { ...playerAction, resultMsg: { msg } };
           }
@@ -456,7 +455,6 @@ export class GameLogic {
 
             const username = player.userId.split("@")[0];
 
-            // console.log({ caster: username, name: skill.name });
 
             const msg = `${username}@${skill.name}@${
               isHit ? "suc" : "miss"
