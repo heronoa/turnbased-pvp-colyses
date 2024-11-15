@@ -53,6 +53,7 @@ export class AuthController {
         res.status(422).json({ error: "Missing Parameters" });
       }
 
+      console.log({ email, password, username });
       const userCreationMsg = await this.authService.signup({
         email,
         password,
@@ -61,6 +62,7 @@ export class AuthController {
 
       res.status(200).json({ msg: userCreationMsg });
     } catch (err: any) {
+      console.log(err);
       res.status(400).json({ error: err.message });
     }
   }

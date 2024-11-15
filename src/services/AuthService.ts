@@ -21,8 +21,7 @@ export class AuthService {
         const userExists = await this.userRepository.findUserById(payload.id);
         return userExists;
       } else {
-        console.log("User not found");
-        return { msg: "User not found" };
+        throw new Error("User not found");
       }
     } catch (err) {
       console.log({ err });
@@ -54,32 +53,30 @@ export class AuthService {
         };
       } else {
         throw new Error("User or Password incorrect");
-        // return { msg: "Password incorrect" };
       }
     } else {
-      return { msg: "user not found" };
+      throw new Error("user not found");
     }
   }
 
   async signup({ email, username, password }: ICredentials): Promise<string> {
-    const saltRounds = 10;
-    let createUser;
+    try {
+      const saltRounds = 10;
 
-    bcrypt.hash(password, saltRounds, async (err, hash) => {
-      if (err) {
-        return err.message;
-      }
-      createUser = await this.userRepository.createUser({
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const createUser = await this.userRepository.createUser({
         email,
-        password: hash,
+        password: hashedPassword,
         username,
       });
-    });
 
-    if (createUser) {
-      return "User created sucessfully";
+      if (createUser) {
+        return "User created sucessfully";
+      }
+
+    } catch (error) {
+      throw new Error((error as Error).message);
     }
-
-    throw new Error("User creation failed");
   }
 }

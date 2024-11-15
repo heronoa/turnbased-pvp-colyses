@@ -60,12 +60,27 @@ export class UsersPrismaORMRepository implements IUsersRepository {
   }
 
   async createUser(user: User): Promise<any> {
-    const createResult = await this.prismaClient.user.create({
-      data: { ...user },
-    });
+    try {
+      const existingUser = await this.prismaClient.user.findUnique({
+        where: {
+          email: user.email,
+        },
+      });
 
-    // console.log({ createResult, user });
-    return createResult;
+      if (existingUser) {
+        throw new Error("User with this email already exists");
+      }
+
+      const createResult = await this.prismaClient.user.create({
+        data: { ...user },
+      });
+
+      console.log({ createResult, user });
+      return createResult;
+    } catch (err) {
+      console.log({ err });
+      throw new Error((err as Error).message);
+    }
   }
   async createManyUser(user: User[]): Promise<any> {
     return this.prismaClient.user.createMany({
