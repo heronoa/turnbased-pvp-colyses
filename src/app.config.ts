@@ -104,8 +104,16 @@ export default config({
      * Use @colyseus/playground
      * (It is not recommended to expose this route in a production environment)
      */
+    app.use("/api/v1", router);
+
     if (process.env.NODE_ENV !== "production") {
       app.use("/", adminAuthMiddleware, playground);
+    }
+
+    if (!process.env.SECRET || process.env.SECRET === "my-secret") {
+      console.warn(
+        "Warning: SECRET environment variable is not set or is using the default value."
+      );
     }
 
     /**
@@ -114,8 +122,6 @@ export default config({
      * Read more: https://docs.colyseus.io/tools/monitor/#restrict-access-to-the-panel-using-a-password
      */
     app.use("/colyseus", adminAuthMiddleware, monitor());
-
-    app.use("/api/v1", router);
   },
 
   beforeListen: () => {
