@@ -12,12 +12,8 @@ import { MyLobbyRoom } from "./rooms/LobbyRoom";
 import { BotRoom } from "./rooms/BotRoom";
 import { GamesPrismaORMRepository } from "../prisma/repositories/game.repository";
 import { DBActions } from "./rooms/DBActions";
-import { ICharacterInitial } from "./rooms/schema/GameStates";
-import { Room } from "colyseus";
-import { MyRoomState } from "./rooms/schema/MyRoomState";
-import { AuthController } from "./controllers/AuthController";
-import { authMiddleware } from "./middlewares/authMiddleware";
 import router from "./routes";
+import { adminAuthMiddleware } from "./middlewares/adminAuthMiddleware";
 
 export default config({
   initializeGameServer: (gameServer) => {
@@ -108,8 +104,16 @@ export default config({
      * Use @colyseus/playground
      * (It is not recommended to expose this route in a production environment)
      */
+    app.use("/api/v1", router);
+
     if (process.env.NODE_ENV !== "production") {
-      app.use("/", playground);
+      app.use("/", adminAuthMiddleware, playground);
+    }
+
+    if (!process.env.SECRET || process.env.SECRET === "my-secret") {
+      console.warn(
+        "Warning: SECRET environment variable is not set or is using the default value."
+      );
     }
 
     /**
@@ -117,9 +121,7 @@ export default config({
      * It is recommended to protect this route with a password
      * Read more: https://docs.colyseus.io/tools/monitor/#restrict-access-to-the-panel-using-a-password
      */
-    app.use("/colyseus", monitor());
-
-    app.use("/api/v1", router);
+    app.use("/colyseus", adminAuthMiddleware, monitor());
   },
 
   beforeListen: () => {

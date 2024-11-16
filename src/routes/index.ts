@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { CharacterController } from "../controllers/CharacterController";
 import { AuthController } from "../controllers/AuthController";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import loginRateLimiter from "../middlewares/rateLimitMiddleware";
 
 const router = express.Router();
 
@@ -28,11 +29,19 @@ router.get("/auth/me", async (req: Request, res: Response) => {
   authController.me(req, res);
 });
 
-router.post("/auth/login", async (req: Request, res: Response) => {
-  authController.login(req, res);
-});
-router.post("/auth/signup", async (req: Request, res: Response) => {
-  authController.signup(req, res);
-});
+router.post(
+  "/auth/login",
+  loginRateLimiter,
+  async (req: Request, res: Response) => {
+    authController.login(req, res);
+  }
+);
+router.post(
+  "/auth/signup",
+  loginRateLimiter,
+  async (req: Request, res: Response) => {
+    authController.signup(req, res);
+  }
+);
 
 export default router;
