@@ -2,7 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { UsersPrismaORMRepository } from "../../prisma/repositories/user.repository";
 import { NextFunction, Request, Response } from "express";
 
-export const authMiddleware = async (
+export const adminAuthMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -19,6 +19,12 @@ export const authMiddleware = async (
 
     if (payload?.id) {
       const userExists = await userRepository.findUserById(payload.id);
+
+      if (userExists.email !== process.env.ADMIN_EMAIL) {
+        res.status(500).json({ msg: "Unauthorized" });
+        return;
+      }
+
       (req as any).userData = userExists;
 
       next();
