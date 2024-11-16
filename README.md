@@ -1,120 +1,118 @@
-# Servidor de Jogo PvP
+# PvP Game Server
 
-Este repositório contém o código para o servidor de um jogo PvP (Player vs Player) desenvolvido usando o framework [Colyseus.js](https://colyseus.io/), WebSocket, Express, TypeScript e o paradigma de orientação a objetos.
+This repository contains the code for a PvP (Player vs Player) game server developed using the [Colyseus.js](https://colyseus.io/) framework, WebSocket, Express, TypeScript, and the object-oriented programming paradigm.
 
-## Sumário
+## Table of Contents
 
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Funcionalidades](#funcionalidades)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação](#instalação)
-- [Uso](#uso)
-- [Scripts Disponíveis](#scripts-disponíveis)
-- [Configuração do Ambiente](#configuração-do-ambiente)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
+- [About the Project](#about-the-project)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Technologies Used](#technologies-used)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Available Scripts](#available-scripts)
+- [Environment Configuration](#environment-configuration)
+- [Contribution](#contribution)
+- [License](#license)
 
-## Sobre o Projeto
+## About the Project
 
-Este projeto implementa o servidor de um jogo multiplayer de batalha PvP baseado em turnos. Ele utiliza o Colyseus para a criação e gestão de salas de jogo em tempo real, permitindo que múltiplos jogadores entrem em partidas e disputem entre si. A comunicação entre cliente e servidor é feita por WebSocket, oferecendo baixa latência nas interações.
+This project implements a server for a turn-based PvP multiplayer game. It uses Colyseus to create and manage game rooms in real time, allowing multiple players to join matches and compete against each other. Communication between the client and server is done via WebSocket abstracted by Colyseus.js framework, ensuring low-latency interactions.
 
-## Funcionalidades
+## Features
 
-- Criação e gerenciamento de salas de jogo.
-- Suporte para múltiplos jogadores em tempo real.
-- Sincronização de estados entre clientes.
-- Sistema de matchmaking para encontrar oponentes.
-- Implementação de lógica de jogo orientada a objetos.
-- Backend em Express para APIs e configuração de rotas auxiliares.
+- Creation and management of game rooms.
+- Support for multiple players in real-time.
+- State synchronization between clients.
+- Matchmaking system to find opponents.
+- Object-oriented implementation of game logic.
+- The backend is in Express for APIs and configuration of auxiliary routes.
 
-## Estrutura do Projeto
+## Project Structure
 
-O projeto segue uma estrutura modular, baseada em pastas:
+The project follows a modular structure, organized into folders:
 
-- **prisma/**: Diretório responsável pela configuração e gerenciamento do Prisma ORM.
+- **prisma/**: Responsible for Prisma ORM configuration and management.
+  - **repositories/**: Contains repositories for accessing and manipulating database data.
+    - **dto/**: Directory for Data Transfer Objects (DTOs) to facilitate data transfer between application layers.
+    - **entities/**: Contains classes and interfaces representing database entities.
+      - **characters.repository.ts**: Repository for manipulating data related to the character entity.
+      - **game.repository.ts**: Repository for manipulating data related to the game entity.
+      - **player.repository.ts**: Repository for manipulating data related to the player entity.
+      - **prismaClient.ts**: Prisma client configuration and instance for database connection.
+      - **user.repository.ts**: Repository for manipulating data related to the user entity.
+  - **schema.prisma**: Prisma schema definition file for the database.
 
-  - **repositories/**: Contém os repositórios para acessar e manipular dados no banco de dados.
-    - **dto/**: Diretório para Data Transfer Objects (DTOs), que facilitam a transferência de dados entre diferentes camadas da aplicação.
-    - **entities/**: Contém as classes e interfaces que representam as entidades do banco de dados.
-      - **characters.repository.ts**: Repositório para manipulação de dados da entidade de personagens.
-      - **game.repository.ts**: Repositório para manipulação de dados da entidade de jogo.
-      - **player.repository.ts**: Repositório para manipulação de dados da entidade de jogador.
-      - **prismaClient.ts**: Configuração e instância do cliente Prisma para conexão com o banco de dados.
-      - **user.repository.ts**: Repositório para manipulação de dados da entidade de usuário.
-  - **schema.prisma**: Arquivo de definição do esquema do banco de dados no Prisma.
+- **src/**: Main source code directory.
+  - **controllers/**: Contains controllers to manage application requests and responses.
+  - **middlewares/**: Contains middlewares to intercept and process requests before reaching the controllers.
+  - **rooms/**: Directory for game room logic (likely using Colyseus for managing multiplayer game sessions).
+  - **routes/**: Defines application routes and maps URLs to controllers.
+  - **services/**: Contains services that encapsulate application business logic.
+  - **utils/**: Contains utilities and helper functions used across the application.
+  - **app.config.ts**: Main application configuration file.
+  - **index.ts**: Application entry point.
 
-- **src/**: Diretório principal do código-fonte da aplicação.
-  - **controllers/**: Contém os controladores que gerenciam as requisições e respostas da aplicação.
-  - **middlewares/**: Contém os middlewares que interceptam e processam as requisições antes de serem tratadas pelos controladores.
-  - **rooms/**: Diretório para a lógica das salas de jogo (provavelmente utilizando o Colyseus para gerenciar sessões de jogo multiplayer).
-  - **routes/**: Define as rotas da aplicação, mapeando URLs para os controladores.
-  - **services/**: Contém os serviços que encapsulam a lógica de negócios da aplicação.
-  - **utils/**: Contém utilitários e funções auxiliares usadas em várias partes da aplicação.
-  - **app.config.ts**: Configuração principal da aplicação.
-  - **index.ts**: Ponto de entrada da aplicação.
+## Technologies Used
 
-## Tecnologias Utilizadas
+- **Colyseus.js** - Framework for developing multiplayer games.
+- **WebSocket** - Communication protocol for real-time data exchange.
+- **Express** - Web server framework for managing API routes.
+- **TypeScript** - A programming language for static typing and better code maintenance.
+- **Object-Oriented Programming** - Programming paradigm for modeling game world using classes and objects.
 
-- **Colyseus.js** - Framework para desenvolvimento de jogos multiplayer.
-- **WebSocket** - Protocolo de comunicação para envio e recebimento de dados em tempo real.
-- **Express** - Framework de servidor web para gerenciar rotas de API.
-- **TypeScript** - Linguagem de programação para tipagem estática e melhor manutenção do código.
-- **Orientação a Objetos** - Paradigma de programação para modelagem do mundo do jogo com classes e objetos.
+## Prerequisites
 
-## Pré-requisitos
+- Node.js (>=16.x), preferably Node.js 21.2.0
+- MongoDB (for game data storage)
 
-- Node.js (>=16.x) de preferência Node.js 21.2.0
-- MongoDB (para armazenamento de dados do jogo)
+## Installation
 
-## Instalação
-
-1. Clone o repositório:
+1. Clone the repository:
 
    ```bash
-   git clone https://github.com/seu-usuario/turnbased-pvp-colyseus.git
+   git clone https://github.com/your-username/turnbased-pvp-colyseus.git
    cd turnbased-pvp-colyseus
    ```
+2. Install dependencies:
 
-2. Instale as dependências:
+  ```bash
+  npm install
+  ```
 
-```bash
-   npm install
-```
+## Usage
 
-## Uso
+1. **Configure environment variables**: Create a `.env` file in the project's root directory and add the necessary settings for the database, server port, and other project-specific variables (see [Environment Configuration](#environment-configuration)).
 
-1. **Configurar variáveis de ambiente**: Crie um arquivo `.env` na raiz do projeto e adicione as configurações necessárias para o banco de dados, porta do servidor e outras variáveis específicas do projeto (veja a seção [Configuração do Ambiente](#configuração-do-ambiente)).
+2. **Start the server**: To run the server in development mode, use the following command:
 
-2. **Iniciar o servidor**: Para rodar o servidor em modo de desenvolvimento, utilize o seguinte comando:
-
-   ```bash
+   ```
    npm run dev
    ```
 
-   O servidor ficará disponível em na porta **2567**.
+   The server will be available on port **2567**.
 
-3. **Acessar o servidor**: Você pode usar ferramentas como Postman ou diretamente o front-end do jogo para interagir com as rotas e funcionalidades do servidor.
+3. **Access the server**: You can interact with the server's routes and functionalities using tools like Postman or the game frontend.
 
-## Scripts Disponíveis
+## Available Scripts
 
-Os seguintes scripts estão disponíveis para facilitar o desenvolvimento e a execução do servidor:
+The following scripts are available to simplify development and server execution:
 
-- **`npm start`**: Executa o servidor em modo de desenvolvimento com reinicialização automática usando Nodemon.
-- **`npm run build`**: Compila o código TypeScript para JavaScript, gerando a saída na pasta `dist`.
-- **`node dist/src/index.js`**: Inicia o servidor a partir do código JavaScript compilado na pasta `dist`.
+- **`npm start`**: Runs the server in development mode with automatic restart using Nodemon.
+- **`npm run build`**: Compiles TypeScript code to JavaScript, generating output in the `dist` folder.
+- **`node dist/src/index.js`**: Starts the server from the compiled JavaScript code in the `dist` folder.
 
-## Configuração do Ambiente
+## Environment Configuration
 
-Para configurar o ambiente, crie os arquivos `.env`, `.env.production` e `.env.development` na raiz do projeto e adicione as seguintes variáveis de ambiente conforme necessário:
+To configure the environment, create `.env`, `.env.production`, and `.env.development` files in the project's root directory and add the following environment variables as needed:
 
-```env
-SAMPLE=development ou production
-DATABASE_URL=mongodb://localhost:27017/meu-banco # URL de conexão com o banco de dados MongoDBretryWrites=true&w=majority&appName=colyseus-turngame"
-SECRET=sua-chave-secreta # Chave secreta para autenticação e segurança
+```
+SAMPLE=development or production
+DATABASE_URL=mongodb://localhost:27017/my-database # MongoDB connection URLretryWrites=true&w=majority&appName=colyseus-turngame
+SECRET=your-secret-key # Secret key for authentication and security
 ```
 
-## Licença
+## License
 
-Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para mais informações.
+This project is licensed under the MIT License. See the LICENSE file for more details.
